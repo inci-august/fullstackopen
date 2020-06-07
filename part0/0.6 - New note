@@ -1,0 +1,27 @@
+
+note over browser:
+* when user clicks 'save', event handler
+immediately calls the method e.preventDefault()
+* event handler creates a new note
+* adds it to the notes list
+* rerenders the note list on the page
+* sends the new note to the server
+end note
+
+browser->server: HTTP POST https://fullstack-exampleapp.herokuapp.com/new_note_spa
+
+note over browser:
+* request payload: {content: "new note", date: "2020-06-07..."}
+* 'Content-Type': application/json
+end note
+
+server-->browser: HTTP Status Code 201 Created
+
+note over server:
+server does not ask for a redirect
+end note
+
+note over browser:
+the browser stays on the same page,
+and sends no further HTTP requests
+end note
