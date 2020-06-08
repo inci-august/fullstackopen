@@ -9,3 +9,4 @@
   - [x] 0.6: New note
 - [ ] Part 1
   - [x] 1.1: course information, step1
+  - [x] 1.2: course information, step2
