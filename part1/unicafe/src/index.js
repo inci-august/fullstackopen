@@ -12,12 +12,18 @@ const Statistics = ({ good, neutral, bad, all, average, positive }) => {
     <div>
       <h2>Statistics</h2>
 
-      <div>Good: {good}</div>
-      <div>Neutral: {neutral}</div>
-      <div>Bad: {bad}</div>
-      <div>All: {all}</div>
-      <div>Average: {average}</div>
-      <div>Positive: {positive}</div>
+      {!all ? (
+        <div>No feedback given</div>
+      ) : (
+        <div>
+          <div>Good: {good}</div>
+          <div>Neutral: {neutral}</div>
+          <div>Bad: {bad}</div>
+          <div>All: {all}</div>
+          <div>Average: {average}</div>
+          <div>Positive: {positive}</div>
+        </div>
+      )}
     </div>
   );
 };

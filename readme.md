@@ -15,3 +15,5 @@
   - [x] 1.5: course information, step5
   - [x] 1.6: unicafe step1
   - [x] 1.7: unicafe step2
+  - [x] 1.8: unicafe step3
+  - [x] 1.9: unicafe step4
