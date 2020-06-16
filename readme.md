@@ -18,3 +18,4 @@
   - [x] 1.8: unicafe step3
   - [x] 1.9: unicafe step4
   - [x] 1.10: unicafe step5
+  - [x] 1.11: unicafe step6

@@ -15,23 +15,26 @@ const Statistics = ({ good, neutral, bad, all, average, positive }) => {
       {!all ? (
         <div>No feedback given</div>
       ) : (
-        <div>
-          <Statistic text="Good" value={good} />
-          <Statistic text="Neutral" value={neutral} />
-          <Statistic text="Bad" value={bad} />
-          <Statistic text="All" value={all} />
-          <Statistic text="Average" value={average} />
-          <Statistic text="Positive" value={positive} />
-        </div>
+        <table>
+          <tbody>
+            <Statistic text="Good" value={good} />
+            <Statistic text="Neutral" value={neutral} />
+            <Statistic text="Bad" value={bad} />
+            <Statistic text="All" value={all} />
+            <Statistic text="Average" value={average} />
+            <Statistic text="Positive" value={positive} />
+          </tbody>
+        </table>
       )}
     </div>
   );
 };
 
 const Statistic = ({ text, value }) => (
-  <div>
-    {text}: {value}
-  </div>
+  <tr>
+    <td>{text}</td>
+    <td>{value}</td>
+  </tr>
 );
 
 const App = () => {
