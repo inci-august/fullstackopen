@@ -7,7 +7,7 @@
   - [x] 0.4: new note
   - [x] 0.5: Single page app
   - [x] 0.6: New note
-- [ ] Part 1
+- [x] Part 1
   - [x] 1.1: course information, step1
   - [x] 1.2: course information, step2
   - [x] 1.3: course information, step3
@@ -21,3 +21,4 @@
   - [x] 1.11: unicafe step6
   - [x] 1.12: anecdotes step1
   - [x] 1.13: anecdotes step2
+  - [x] 1.14: anecdotes step3

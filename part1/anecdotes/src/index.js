@@ -1,17 +1,50 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom";
 
-const App = (props) => {
+const AnecdoteOfTheDay = ({ anecdote, vote, handleVote, handleSelect }) => {
+  return (
+    <div>
+      <h2>Anecdote of the day</h2>
+      <p>{anecdote}</p>
+      <p>Has {vote} votes</p>
+
+      <button onClick={handleVote}>Vote</button>
+      <button onClick={handleSelect}>Next anecdote</button>
+    </div>
+  );
+};
+
+const AnecdoteWithMostVotes = ({ bestAnecdote, maxVote }) => {
+  return (
+    <div>
+      <h2>Anecdote with most votes</h2>
+      {maxVote ? (
+        <div>
+          <p>{bestAnecdote}</p>
+          <p>Has {maxVote} votes</p>
+        </div>
+      ) : (
+        <p>No votes given</p>
+      )}
+    </div>
+  );
+};
+
+const App = () => {
   const [selected, setSelected] = useState(0);
   const [points, setPoints] = useState(Array(anecdotes.length).fill(0));
 
-  const rand = Math.floor(Math.random() * anecdotes.length);
+  let rand = generateRandom(anecdotes.length);
+  const maxVote = Math.max(...points);
+  const bestAnecdote = anecdotes[points.indexOf(maxVote)];
 
-  const select = () => {
-    setSelected(rand);
+  const handleSelect = () => {
+    let newSelected =
+      selected !== rand ? rand : generateRandom(anecdotes.length);
+    setSelected(newSelected);
   };
 
-  const vote = () => {
+  const handleVote = () => {
     const newPoints = [...points];
     newPoints[selected] += 1;
     setPoints(newPoints);
@@ -19,14 +52,20 @@ const App = (props) => {
 
   return (
     <div>
-      <p>{anecdotes[selected]}</p>
-      <p>Has {points[selected]} votes</p>
-
-      <button onClick={vote}>Vote</button>
-      <button onClick={select}>Next anecdote</button>
+      <AnecdoteOfTheDay
+        anecdote={anecdotes[selected]}
+        vote={points[selected]}
+        handleVote={handleVote}
+        handleSelect={handleSelect}
+      />
+      <AnecdoteWithMostVotes bestAnecdote={bestAnecdote} maxVote={maxVote} />
     </div>
   );
 };
+
+function generateRandom(length) {
+  return Math.floor(Math.random() * length);
+}
 
 const anecdotes = [
   "If it hurts, do it more often",

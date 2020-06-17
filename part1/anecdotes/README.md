@@ -1,1 +1,3 @@
 # Anecdotes
+
+![Anecdotes](anecdotes.png)
