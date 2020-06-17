@@ -20,3 +20,4 @@
   - [x] 1.10: unicafe step5
   - [x] 1.11: unicafe step6
   - [x] 1.12: anecdotes step1
+  - [x] 1.13: anecdotes step2
