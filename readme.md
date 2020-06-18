@@ -24,3 +24,5 @@
   - [x] 1.14: anecdotes step3
 - [ ] Part 2
   - [x] 2.1: course contents step6
+  - [x] 2.2: course contents step7
+  - [x] 2.3: course contents step8
