@@ -34,14 +34,15 @@ const App = () => {
   const [selected, setSelected] = useState(0);
   const [points, setPoints] = useState(Array(anecdotes.length).fill(0));
 
-  let rand = generateRandom(anecdotes.length);
   const maxVote = Math.max(...points);
   const bestAnecdote = anecdotes[points.indexOf(maxVote)];
 
   const handleSelect = () => {
-    let newSelected =
-      selected !== rand ? rand : generateRandom(anecdotes.length);
-    setSelected(newSelected);
+    let rand = generateRandom(anecdotes.length);
+    while (rand === selected) {
+      rand = generateRandom(anecdotes.length);
+    }
+    setSelected(rand);
   };
 
   const handleVote = () => {
