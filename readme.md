@@ -26,3 +26,4 @@
   - [x] 2.1: course contents step6
   - [x] 2.2: course contents step7
   - [x] 2.3: course contents step8
+  - [x] 2.4: course contents step9
