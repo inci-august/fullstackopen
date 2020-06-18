@@ -22,3 +22,5 @@
   - [x] 1.12: anecdotes step1
   - [x] 1.13: anecdotes step2
   - [x] 1.14: anecdotes step3
+- [ ] Part 2
+  - [x] 2.1: course contents step6
