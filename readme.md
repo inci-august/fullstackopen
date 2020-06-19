@@ -13,18 +13,19 @@
   - [x] 1.3: course information, step3
   - [x] 1.4: course information, step4
   - [x] 1.5: course information, step5
-  - [x] 1.6: unicafe step1
-  - [x] 1.7: unicafe step2
-  - [x] 1.8: unicafe step3
-  - [x] 1.9: unicafe step4
-  - [x] 1.10: unicafe step5
-  - [x] 1.11: unicafe step6
-  - [x] 1.12: anecdotes step1
-  - [x] 1.13: anecdotes step2
-  - [x] 1.14: anecdotes step3
+  - [x] 1.6: unicafe, step1
+  - [x] 1.7: unicafe, step2
+  - [x] 1.8: unicafe, step3
+  - [x] 1.9: unicafe, st
+  - [x] 1.10: unicafe, step5
+  - [x] 1.11: unicafe, step6
+  - [x] 1.12: anecdotes, step1
+  - [x] 1.13: anecdotes, step2
+  - [x] 1.14: anecdotes, step3
 - [ ] Part 2
-  - [x] 2.1: course contents step6
-  - [x] 2.2: course contents step7
-  - [x] 2.3: course contents step8
-  - [x] 2.4: course contents step9
+  - [x] 2.1: course contents, step6
+  - [x] 2.2: course contents, step7
+  - [x] 2.3: course contents, step8
+  - [x] 2.4: course contents, step9
   - [x] 2.5: separate module
+  - [x] 2.6: the phonebook, step1
