@@ -30,3 +30,4 @@
   - [x] 2.5: separate module
   - [x] 2.6: the phonebook, step1
   - [x] 2.7: the phonebook, step2
+  - [x] 2.8: the phonebook, step3
