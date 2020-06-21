@@ -33,3 +33,4 @@
   - [x] 2.8: the phonebook, step3
   - [x] 2.9: the phonebook, step4
   - [x] 2.10: the phonebook, step5
+  - [x] 2.11: the phonebook, step6
