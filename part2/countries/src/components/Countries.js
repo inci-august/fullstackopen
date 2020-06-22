@@ -2,15 +2,15 @@ import React from "react";
 
 function Countries({ countries }) {
   return (
-    <div>
+    <div style={{ margin: "20px 0" }}>
       {countries.length >= 10 ? (
         <div>Too many matches, specify another filter</div>
       ) : (
-        <ul>
+        <div>
           {countries.map((country) => (
-            <li key={country.alpha3Code}>{country.name}</li>
+            <div key={country.alpha3Code}>{country.name}</div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );

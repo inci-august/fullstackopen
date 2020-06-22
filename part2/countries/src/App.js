@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Country from "./components/Country";
 import Countries from "./components/Countries";
+import CountrySearch from "./components/CountrySearch";
 import axios from "axios";
 
 function App() {
@@ -13,7 +14,7 @@ function App() {
     });
   }, []);
 
-  const handleChange = (e) => {
+  const handleFilterChange = (e) => {
     setFilter(e.target.value);
   };
 
@@ -25,10 +26,7 @@ function App() {
 
   return (
     <div className="App">
-      <label>
-        Find countries{" "}
-        <input value={filter} onChange={handleChange} type="search" />
-      </label>
+      <CountrySearch filter={filter} onFilterChange={handleFilterChange} />
 
       {countriesToDisplay.length === 1 ? (
         <Country country={countriesToDisplay[0]} />
