@@ -5,8 +5,8 @@
   - [x] 0.2: CSS
   - [x] 0.3: HTML forms
   - [x] 0.4: new note
-  - [x] 0.5: Single page app
-  - [x] 0.6: New note
+  - [x] 0.5: single page app
+  - [x] 0.6: new note
 - [x] Part 1
   - [x] 1.1: course information, step1
   - [x] 1.2: course information, step2
@@ -34,3 +34,4 @@
   - [x] 2.9: the phonebook, step4
   - [x] 2.10: the phonebook, step5
   - [x] 2.11: the phonebook, step6
+  - [x] 2.12: data for countries, step1
