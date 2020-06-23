@@ -24,6 +24,10 @@ function App() {
       country.name.toLowerCase().includes(filter.toLowerCase())
     );
 
+  const showInfo = (countryName) => {
+    setFilter(countryName);
+  };
+
   return (
     <div className="App">
       <CountrySearch filter={filter} onFilterChange={handleFilterChange} />
@@ -31,7 +35,10 @@ function App() {
       {countriesToDisplay.length === 1 ? (
         <Country country={countriesToDisplay[0]} />
       ) : (
-        <Countries countries={countriesToDisplay ? countriesToDisplay : []} />
+        <Countries
+          showInfo={showInfo}
+          countries={countriesToDisplay ? countriesToDisplay : []}
+        />
       )}
     </div>
   );

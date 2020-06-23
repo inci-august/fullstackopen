@@ -35,3 +35,4 @@
   - [x] 2.10: the phonebook, step5
   - [x] 2.11: the phonebook, step6
   - [x] 2.12: data for countries, step1
+  - [x] 2.13: data for countries, step2
