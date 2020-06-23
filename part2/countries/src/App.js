@@ -6,7 +6,13 @@ import axios from "axios";
 
 function App() {
   const [filter, setFilter] = useState("");
-  const [countries, setCountries] = useState([]);
+  const [countries, setCountries] = useState(null);
+
+  const countriesToDisplay =
+    filter &&
+    countries.filter((country) =>
+      country.name.toLowerCase().includes(filter.toLowerCase())
+    );
 
   useEffect(() => {
     axios.get("https://restcountries.eu/rest/v2/all").then((res) => {
@@ -18,12 +24,6 @@ function App() {
     setFilter(e.target.value);
   };
 
-  const countriesToDisplay =
-    filter &&
-    countries.filter((country) =>
-      country.name.toLowerCase().includes(filter.toLowerCase())
-    );
-
   const showInfo = (countryName) => {
     setFilter(countryName);
   };
@@ -32,7 +32,7 @@ function App() {
     <div className="App">
       <CountrySearch filter={filter} onFilterChange={handleFilterChange} />
 
-      {countriesToDisplay.length === 1 ? (
+      {!countriesToDisplay ? null : countriesToDisplay.length === 1 ? (
         <Country country={countriesToDisplay[0]} />
       ) : (
         <Countries
