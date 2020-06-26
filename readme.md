@@ -38,3 +38,5 @@
   - [x] 2.13: data for countries, step2
   - [x] 2.14: data for countries, step3
   - [x] 2.15: the phonebook, step 7
+  - [x] 2.16: the phonebook, step 8
+  - [x] 2.17: the phonebook, step 9
