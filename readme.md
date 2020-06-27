@@ -16,13 +16,13 @@
   - [x] 1.6: unicafe, step1
   - [x] 1.7: unicafe, step2
   - [x] 1.8: unicafe, step3
-  - [x] 1.9: unicafe, st
+  - [x] 1.9: unicafe, step4
   - [x] 1.10: unicafe, step5
   - [x] 1.11: unicafe, step6
   - [x] 1.12: anecdotes, step1
   - [x] 1.13: anecdotes, step2
   - [x] 1.14: anecdotes, step3
-- [ ] Part 2
+- [x] Part 2
   - [x] 2.1: course contents, step6
   - [x] 2.2: course contents, step7
   - [x] 2.3: course contents, step8
@@ -42,3 +42,4 @@
   - [x] 2.17: the phonebook, step 9
   - [x] 2.18: the phonebook, step 10
   - [x] 2.19: the phonebook, step 11
+  - [x] 2.20: the phonebook, step 12
