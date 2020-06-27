@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
 import Persons from "./components/Persons";
+import Notification from "./components/Notification";
 import personService from "./services/persons";
 
 const App = () => {
@@ -9,6 +10,7 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filter, setFilter] = useState("");
+  const [successMessage, setSuccessMessage] = useState(null);
 
   useEffect(() => {
     personService
@@ -34,6 +36,12 @@ const App = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    if (!newName || !newNumber) {
+      alert("Please fill in the fields");
+      return;
+    }
+
+    // Person exists in the database
     const existingPerson = persons.find(
       (person) => person.name.toLowerCase() === newName.toLowerCase()
     );
@@ -45,6 +53,7 @@ const App = () => {
       return;
     }
 
+    // Change number for exiting person in database
     if (existingPerson && existingPerson.number !== newNumber) {
       if (
         window.confirm(
@@ -62,21 +71,30 @@ const App = () => {
                 person.id !== id ? person : returnedPerson
               )
             );
+            setSuccessMessage(`Updated ${changedPerson.name}'s number`);
+            setTimeout(() => {
+              setSuccessMessage(null);
+            }, 5000);
+            setNewName("");
+            setNewNumber("");
           })
           .catch((err) => alert(err));
-        setNewName("");
-        setNewNumber("");
         return;
       } else {
         return;
       }
     }
 
+    // create new person & send to database
     const newPerson = { name: newName, number: newNumber };
     personService
       .create(newPerson)
       .then((returnedPerson) => {
         setPersons(persons.concat(returnedPerson));
+        setSuccessMessage(`Added ${returnedPerson.name}`);
+        setTimeout(() => {
+          setSuccessMessage(null);
+        }, 5000);
         setNewName("");
         setNewNumber("");
       })
@@ -99,6 +117,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={successMessage} />
       <Filter filter={filter} onFilterChange={handleFilterChange} />
       <PersonForm
         onFormSubmit={handleSubmit}

@@ -41,3 +41,4 @@
   - [x] 2.16: the phonebook, step 8
   - [x] 2.17: the phonebook, step 9
   - [x] 2.18: the phonebook, step 10
+  - [x] 2.19: the phonebook, step 11
