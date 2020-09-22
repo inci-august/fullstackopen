@@ -44,7 +44,7 @@ const App = () => {
   const [bad, setBad] = useState(0);
 
   const all = good + neutral + bad;
-  const average = (good - bad) / 3;
+  const average = (good - bad) / all;
   const positive = (all ? (good * 100) / all : 0) + " %";
 
   return (
