@@ -8,6 +8,7 @@
   - [REST](#rest)
   - [Fetching a Single Resource](#fetching-a-single-resource)
   - [Deleting Resources](#deleting-resources)
+  - [Postman](#postman)
 
 - Make a folder
 
@@ -315,3 +316,14 @@ app.delete("/api/notes/:id", (req, res) => {
 ```
 
 If deleting the resource is successful, meaning that the note exists and it is removed, we respond to the request with the status code **`204`** no content and return no data with the response. We can also respond with **`404`**.
+
+## Postman
+
+**`HTTP GET`** requests are easy to make from the browser. But how do we test the **`delete`** operations? We could write some JS for testing deletion, but this is not always the best solution.
+
+One method is to use a command line program [curl](https://curl.haxx.se/). However it's easier to use Postman.
+
+It's enough to define the url and then select the correct request type (**`DELETE`**).
+
+![POSTMAN delete](postman_delete.png)
+
