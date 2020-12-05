@@ -7,6 +7,7 @@
   - [Nodemon](#nodemon)
   - [REST](#rest)
   - [Fetching a Single Resource](#fetching-a-single-resource)
+  - [Deleting Resources](#deleting-resources)
 
 - Make a folder
 
@@ -299,3 +300,18 @@ res.status(404).sendFile('/absolute/path/to/404.png')
 ```
 
 We do not actually need to display anything in the browser because REST APIs are interfaces that are intended for programmatic use, and the error status code is all that is needed.
+
+## Deleting Resources
+
+Deletion happens by making an HTTP **`DELETE`** request to the url of the resource:
+
+```js
+app.delete("/api/notes/:id", (req, res) => {
+  const id = Number(req.params.id)
+  notes = notes.filter((note) => note.id !== id)
+
+  res.status(204).end()
+})
+```
+
+If deleting the resource is successful, meaning that the note exists and it is removed, we respond to the request with the status code **`204`** no content and return no data with the response. We can also respond with **`404`**.
