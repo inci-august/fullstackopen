@@ -3,6 +3,7 @@
 - [Node.js and Express](#nodejs-and-express)
   - [Simple Web Server](#simple-web-server)
   - [Expess](#expess)
+  - [Web and Express](#web-and-express)
 
 - Make a folder
 
@@ -94,3 +95,44 @@ npm install express
 npm update
 ```
 
+## Web and Express
+
+```js
+const express = require('express')
+const app = express()
+
+let notes = [
+  ...
+]
+
+app.get('/', (request, response) => {
+  response.send('<h1>Hello World!</h1>')
+})
+
+app.get('/api/notes', (request, response) => {
+  response.json(notes)
+})
+
+const PORT = 3001
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
+})
+```
+
+We define two *routes* to the app. The event handler function accepts two parameters: **`request`** and **`response`**. **`request`** contains all of the info of the HTTP request, **`response`** parameters is used to define how the request is responded to.
+
+The request to the app's root (**`/`**) is answered by using the **`send`** method of the **`response`** object. Server responds with the string **`<h1>Hello World!</h1>`**, that was passed to the **`send`** method. Since the parameter is a string, express automatically sets the value of the **`Content-Type`** header to be **`text/html`**. The status code of the response defaults to **`200`**.
+
+![Express](express.png)
+
+The second route defines an event handler, that handles **HTTP GET** request made to the **_notes_** path of the application.
+
+The request is responded to with the **`json`** method of the **`response`** object. **`Content-Type`** is automatically set to **`application/json`**.
+
+In the earlier version where we were only using Node, we had to transform the data into the JSON format with the **`JSON.stringify`** method.
+
+```js
+response.end(JSON.stringify(notes))
+```
+
+With Express, this transformation happens automatically.
