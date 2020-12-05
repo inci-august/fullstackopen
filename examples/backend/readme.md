@@ -6,6 +6,7 @@
   - [Web and Express](#web-and-express)
   - [Nodemon](#nodemon)
   - [REST](#rest)
+  - [Fetching a Single Resource](#fetching-a-single-resource)
 
 - Make a folder
 
@@ -191,3 +192,110 @@ We can execute different operations on resources. The operation to be executed i
 | **`notes/10`** | **`DELETE`** | removes the identified resource                                  |
 | **`notes/10`** | **`PUT`**    | replaces the entire identified resource with the request data    |
 | **`notes/10`** | **`PATCH`**  | replaces a part of the identified resource with the request data |
+
+## Fetching a Single Resource
+
+- Let's create a route for fetching a single resource
+
+```js
+app.get("/api/notes/:id", (req, res) => {
+  const id = req.params.id
+  const note = notes.find((note) => note.id === id)
+  res.json(note)
+})
+```
+
+- Now **`app.get("api/notes/:id", ...)`** will handle all HTTP GET requests, that are of the form **_/api/notes/SOMETHING_**, where *SOMETHING* is an arbitrary string.
+
+- The **_id_** parameter in the route of a request, can be accessed through the **`req`** object:
+
+```js
+const id = request.params.id
+```
+
+- **`find`** method of arrays is used to find the note with an id that matches the parameter. The note is then returned to the sender of the request.
+
+- When we test our app by visiting http://localhost:3001/api/notes/1, we notice that it does not appear to work, as the browser displays an empty page.
+
+- Let's debug using **`console.log()`**:
+
+```js
+app.get("/api/notes/:id", (req, res) => {
+  const id = req.params.id
+  console.log(id)
+  const note = notes.find((note) => note.id === id)
+  console.log(note)
+  res.json(note)
+})
+```
+
+- When we revisit http://localhost:3001/api/notes/1, the console which is the terminal in this case, will display the following:
+
+![REST undefined](rest_undefined.png)
+
+- The **`id`** parameter from the route is passed to our app but the **`find`** method does not find a matching note.
+
+- To further our investigation, we can also add a **`console.log`** inside the comparison function passed to the **`find`** method.
+
+```js
+app.get("/api/notes/:id", (req, res) => {
+  const id = req.params.id
+  const note = notes.find((note) => {
+    console.log(note.id, typeof note.id, id, typeof id, note.id === id)
+    return note.id === id
+  })
+  console.log(note)
+  res.json(note)
+})
+```
+
+When we visit the URL again, each call to the comparison function prints a few different things to the console.
+
+![REST typeof](rest_typeof.png)
+
+The **`id`** variable contains a string **`"1"`**, wheres the ids of notes are integers. In JS, the "triple equals" comparison **`===`** considers all values of different types to not be equal by default, meaning that **`1`** is not **`"1"`**.
+
+- Let's fix the issue by changing id parameter from a string into a number:
+
+```js
+app.get("/api/notes/:id", (req, res) => {
+  const id = Number(req.params.id)
+  const note = notes.find((note) => note.id === id)
+  res.json(note)
+})
+```
+
+- Now fetching an individual resource works.
+
+![REST fixed](rest_fixed.png)
+
+However, there's another problem. If we search for a note with an id that does not exist, the server responds with:
+
+![Server error](server_error.png)
+
+HTTP status code **`200`** means that the response succeeded. But there's no data sent back.
+
+The reason for this is that the **`note`** variable is set to **`undefined`** if no mathing note is found. The situation needs to be handled on the server. If no note is found, the server should respond with the status code **`404`** not found instead of **`200`**.
+
+```js
+app.get("/api/notes/:id", (req, res) => {
+  const id = Number(req.params.id)
+  const note = notes.find((note) => note.id === id)
+
+  if (note) {
+    res.json(note)
+  } else {
+    res.status(404).end()
+  }
+})
+```
+
+Since no data is attached to the response, we use the [status](http://expressjs.com/en/4x/api.html#res.status) method for setting the status, and the [end](http://expressjs.com/en/4x/api.html#res.end) method for responding to the request without sending any data.
+
+```js
+res.status(403).end()
+res.status(400).send('Bad Request')
+res.status(404).sendFile('/absolute/path/to/404.png')
+```
+
+We do not actually need to display anything in the browser because REST APIs are interfaces that are intended for programmatic use, and the error status code is all that is needed.
