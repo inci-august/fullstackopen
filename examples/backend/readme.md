@@ -4,6 +4,7 @@
   - [Simple Web Server](#simple-web-server)
   - [Expess](#expess)
   - [Web and Express](#web-and-express)
+  - [Nodemon](#nodemon)
 
 - Make a folder
 
@@ -136,3 +137,34 @@ response.end(JSON.stringify(notes))
 ```
 
 With Express, this transformation happens automatically.
+
+## Nodemon
+
+> nodemon will watch the files in the directory in which nodemon was started, and if any files change, nodemon will autumatically restart your node application.
+
+```sh
+# npm install --save-dev nodemon
+```
+
+We can start our application with **_nodemon_** like this:
+
+```sh
+node_modules/.bin/nodemon index.js
+```
+
+Even though the backend server restarts automatically, the browser still has to be manually refreshed.
+
+Let's define a dedicated **_npm script_** for it in the **_package.json_** file:
+
+```json
+"scripts": {
+  "start": "node index.js",
+  "dev": "nodemon index.js",
+}
+```
+
+Start the server in the dev mode:
+
+```sh
+npm run dev
+```
