@@ -43,3 +43,5 @@
   - [x] 2.18: the phonebook, step 10
   - [x] 2.19: the phonebook, step 11
   - [x] 2.20: the phonebook, step 12
+- [x] Part 3
+  - [x] 3.1:
