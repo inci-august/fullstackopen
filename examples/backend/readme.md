@@ -9,6 +9,7 @@
   - [Fetching a Single Resource](#fetching-a-single-resource)
   - [Deleting Resources](#deleting-resources)
   - [Postman](#postman)
+  - [The Visual Studio Code REST Client](#the-visual-studio-code-rest-client)
 
 - Make a folder
 
@@ -128,7 +129,7 @@ We define two *routes* to the app. The event handler function accepts two parame
 
 The request to the app's root (**`/`**) is answered by using the **`send`** method of the **`response`** object. Server responds with the string **`<h1>Hello World!</h1>`**, that was passed to the **`send`** method. Since the parameter is a string, express automatically sets the value of the **`Content-Type`** header to be **`text/html`**. The status code of the response defaults to **`200`**.
 
-![Express](express.png)
+![Express](readme-imgs/express.png)
 
 The second route defines an event handler, that handles **HTTP GET** request made to the **_notes_** path of the application.
 
@@ -233,7 +234,7 @@ app.get("/api/notes/:id", (req, res) => {
 
 - When we revisit http://localhost:3001/api/notes/1, the console which is the terminal in this case, will display the following:
 
-![REST undefined](rest_undefined.png)
+![REST undefined](readme-imgs/rest_undefined.png)
 
 - The **`id`** parameter from the route is passed to our app but the **`find`** method does not find a matching note.
 
@@ -253,7 +254,7 @@ app.get("/api/notes/:id", (req, res) => {
 
 When we visit the URL again, each call to the comparison function prints a few different things to the console.
 
-![REST typeof](rest_typeof.png)
+![REST typeof](readme-imgs/rest_typeof.png)
 
 The **`id`** variable contains a string **`"1"`**, wheres the ids of notes are integers. In JS, the "triple equals" comparison **`===`** considers all values of different types to not be equal by default, meaning that **`1`** is not **`"1"`**.
 
@@ -269,11 +270,11 @@ app.get("/api/notes/:id", (req, res) => {
 
 - Now fetching an individual resource works.
 
-![REST fixed](rest_fixed.png)
+![REST fixed](readme-imgs/rest_fixed.png)
 
 However, there's another problem. If we search for a note with an id that does not exist, the server responds with:
 
-![Server error](server_error.png)
+![Server error](readme-imgs/server_error.png)
 
 HTTP status code **`200`** means that the response succeeded. But there's no data sent back.
 
@@ -325,5 +326,18 @@ One method is to use a command line program [curl](https://curl.haxx.se/). Howev
 
 It's enough to define the url and then select the correct request type (**`DELETE`**).
 
-![POSTMAN delete](postman_delete.png)
+![POSTMAN delete](readme-imgs/postman_delete.png)
 
+## The Visual Studio Code REST Client
+
+You can use VS Code [REST client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client) plugin instead of Postman.
+
+- Make a directory at the root of application named **_requests_**. Save all the **REST client** requests in the directory as files that end with the **_.rest_** extension.
+
+- Let's create a new **get_all_notes.http** file and define the request that fetches all notes.
+
+![REST client](readme-imgs/rest_client.png)
+
+By clicking the **_Send Request_** text, the REST client will execute the HTTP request and response from the server is opened in the editor:
+
+![REST client GET](readme-imgs/rest_client_get.png)
