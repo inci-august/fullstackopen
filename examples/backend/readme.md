@@ -10,6 +10,7 @@
   - [Deleting Resources](#deleting-resources)
   - [Postman](#postman)
   - [The Visual Studio Code REST Client](#the-visual-studio-code-rest-client)
+  - [Receiving Data](#receiving-data)
 
 - Make a folder
 
@@ -148,7 +149,7 @@ With Express, this transformation happens automatically.
 > nodemon will watch the files in the directory in which nodemon was started, and if any files change, nodemon will autumatically restart your node application.
 
 ```sh
-# npm install --save-dev nodemon
+npm install --save-dev nodemon
 ```
 
 We can start our application with **_nodemon_** like this:
@@ -341,3 +342,133 @@ You can use VS Code [REST client](https://marketplace.visualstudio.com/items?ite
 By clicking the **_Send Request_** text, the REST client will execute the HTTP request and response from the server is opened in the editor:
 
 ![REST client GET](readme-imgs/rest_client_get.png)
+
+## Receiving Data
+
+We add new notes to the server by making an **`HTTP POST`** request to the address http://localhost:3001/api/notes, and by sending all the info for the new note in the **request body** in the **JSON format**.
+
+In order to access the data easily, we need the help of the express **`json-parser`**, that is taken to use with command **`app.use(express.json())`**.
+
+```js
+app.post("/api/notes", (req, res) => {
+  const note = req.body
+  console.log(note)
+
+  res.json(note)
+})
+```
+
+The event handler function can access the data from the **`body`** property of the **`req`** object.
+
+Without the **json-parser**, the **`body`** property would be **`undefined`**. The **json-parser** functions so that it takes the JSON data of a request, transforms it into a JS object and then attaches it to the **`body`** property of the **`req`** object before the route handler is called.
+
+For now, the app does not do anything with the received data besides printing it to the console and sending it back in the response.
+
+Let's verify with REST client that the data is actually received by the server:
+
+```json
+POST http://localhost:3001/api/notes
+content-type: application/json
+
+{
+    "content": "REST client is a good tool for testing REST apis",
+    "important": true
+}
+```
+
+We can verify using POSTMAN as well:
+
+![POSTMAN post](readme-imgs/postman_post.png)
+
+The app prints the data that we sent in the request to the console:
+
+![REST post](readme-imgs/rest_post.png)
+
+The server will not be able to parse the data correctly without the correct value in the header. It won't even try to guess the format of the data, since there's a massive amount of potential ***Content-Types***.
+
+So you need to set **`Content-Type`** correctly.
+
+One benefit that the **REST client** has over **Postman** is that the requests are handily available at the root of the project repo, and they can be distributed to everyone in the dev team. You can also add multiple requests in the same file using **`###`** separators.
+
+```sh
+GET http://localhost:3001/api/notes/
+
+###
+
+POST http://localhost:3001/api/notes HTTP/1.1
+content-type: application/json
+
+{
+  "name": "sample",
+  "time": "Wed, 21 Oct 2015 18:27:50 GMT"
+}
+```
+
+> **Important sidenote:**
+> Sometimes when you're debugging, you ma want to find out what headers have been set in the HTTP request.
+> One way is through the **`get`** method of the **`request`** object, that can be used for getting the value of a single header. The **`request`** object also has the **`headers`** property, that contains all of the headers of a specific request.
+> Problems can occur with the VS REST client if you accidentally add an empty line between the top row and the row specifying the HTTP headers. In this situation, the REST client interprets this to mean that all headers are left empty, which leads to the backend server not knowing that the data it received is in the JSON format.
+
+You'll be able to spot this missing **`Content-Type`** header if at some point in your code you print all of the request headers with the **`console.log(request.headers)`** command.
+
+One we know that the app receives data correctly, it's time to finalize the handling of the request:
+
+```js
+app.post("/api/notes", (req, res) => {
+  console.log(req.headers)
+  const maxId = notes.length > 0 ? Math.max(...notes.map((n) => n.id)) : 0
+
+  const note = req.body
+  note.id = maxId + 1 // not recommended
+
+  notes = notes.concat(note)
+
+  res.json(note)
+})
+```
+
+![REST client - post & save](readme-imgs/rest_post_save.png)
+
+The current version still has the problem that the HTTP POST request can be used to add objects with arbitrary properties. Let's improve the app by defining that the **`content`** property may not be empty. The **`important`** and **`date`** properties will be given default values. All other properties are discarded:
+
+```js
+const generatedId = () => {
+  const maxId = notes.length > 0 ? Math.max(...notes.map((note) => note.id)) : 0
+  return maxId + 1
+}
+
+app.post("/api/notes", (req, res) => {
+  const body = req.body
+
+  if (!body.content) {
+    return res.status(400).json({
+      error: "content missing",
+    })
+  }
+
+  const note = {
+    content: body.content,
+    important: body.important || false,
+    date: new Date(),
+    id: generatedId(),
+  }
+
+  notes = notes.concat(note)
+
+  res.json(note)
+})
+```
+
+If the received data is missing a value for the content property, the server will respond to the request with the status code **`400 bad request`**.
+
+```js
+if (!body.content) {
+  return response.status(400).json({
+    error: 'content missing'
+  })
+}
+```
+
+Notice that calling **`return`** is crucial, because otherwise the code will execute to the very end and the malformed note gets saved to the app.
+
+> It is better to generate timestamps on the server than in the browser, since we can't trust that host machine running the browser has its clock set correctly.

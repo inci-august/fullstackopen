@@ -1,0 +1,14 @@
+
+GET http://localhost:3001/api/notes
+
+###
+
+POST http://localhost:3001/api/notes
+content-type: application/json
+
+{
+    "content": "REST client is a good tool for testing REST apis",
+    "important": true
+}
+
+###
