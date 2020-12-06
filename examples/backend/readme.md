@@ -11,6 +11,7 @@
   - [Postman](#postman)
   - [The Visual Studio Code REST Client](#the-visual-studio-code-rest-client)
   - [Receiving Data](#receiving-data)
+  - [Middleware](#middleware)
 
 - Make a folder
 
@@ -472,3 +473,67 @@ if (!body.content) {
 Notice that calling **`return`** is crucial, because otherwise the code will execute to the very end and the malformed note gets saved to the app.
 
 > It is better to generate timestamps on the server than in the browser, since we can't trust that host machine running the browser has its clock set correctly.
+
+## Middleware
+
+The express **_json-parser_** we took into use earlier is a so called middleware.
+
+Middleware are functions that can be used for handling **`request`** and **`response`** objects.
+
+The **json-parser** takes the raw data from the requests that's stored in the **`request`** object, parses it into a JavaScript object an assigns it to the request object as a new property _body_.
+
+In practice, you can use several middleware at the same time. When you have more than one, they're executed one by one in the order that they were taken into use in express.
+
+Let's implement our own middleware that prints info about every request that is sent to the server.
+
+Middleware is a function that receives three parameters:
+
+```js
+const requestLogger = (req, res, next) => {
+  console.log("Method: ", req.method)
+  console.log("Path: ", req.path)
+  console.log("Body: ", req.body)
+  console.log("---")
+  next()
+}
+```
+
+At the end of the function body the **`next`** function that was passed as a parameter is called. The **`next`** function yields control to the next middleware.
+
+Middleware are taken into use like this:
+
+```js
+app.use(requestLogger)
+```
+
+Middleware functions are called in the order that they're taken into use with the express server object's **`use`** method.
+
+Use **json-parser** before **`requestLogger`** middleware, because otherwise **`req.body`** will not be initialized when the logger is executed.
+
+Now let's make a request from the REST client:
+
+```http
+POST http://localhost:3001/api/notes
+content-type: application/json
+
+{
+    "content": "REST client is a good tool for testing REST apis",
+    "important": true
+}
+```
+
+This is what it logs to the console:
+
+![Custom middleware](readme-imgs/middleware.png)
+
+Middleware functions have to be taken into use before routes if we want them to be executed before the route event handlers are called. There are also situations where we want to define middleware functions after routes. In practice, this means that we are defining middleware function that are only called if no route handles the HTTP request.
+
+Let's add the following middleware after our routes, that is used for catching requests made to non-existent routes. For these requests, the middleware will return an error message in the JSON format.
+
+```js
+const unknownEndpoint = (req, res) => {
+  res.status(404).send({ error: "unknown endpoint" })
+}
+
+app.use(unknownEndpoint)
+```
