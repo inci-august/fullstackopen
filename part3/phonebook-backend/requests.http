@@ -25,3 +25,13 @@ content-type: application/json
   "name": "Rintarou Okabe",
   "number": "039248709478"
 }
+
+###
+
+POST http://localhost:3001/api/persons
+content-type: application/json
+
+{
+  "name": "Ada Lovelace",
+  "number": "039248709478"
+}
