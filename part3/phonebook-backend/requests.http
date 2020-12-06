@@ -15,3 +15,13 @@ GET http://localhost:3001/api/persons/5
 ###
 
 DELETE http://localhost:3001/api/persons/3
+
+###
+
+POST http://localhost:3001/api/persons
+content-type: application/json
+
+{
+  "name": "Rintarou Okabe",
+  "number": "039248709478"
+}
