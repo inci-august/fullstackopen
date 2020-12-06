@@ -45,3 +45,4 @@
   - [x] 2.20: the phonebook, step 12
 - [ ] Part 3
   - [x] 3.1: phonebook backend, step 1
+  - [x] 3.2: phonebook backend, step 2
