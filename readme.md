@@ -50,3 +50,4 @@
   - [x] 3.4: phonebook backend, step 4
   - [x] 3.5: phonebook backend, step 5
   - [x] 3.6: phonebook backend, step 6
+  - [x] 3.7: phonebook backend, step 7
