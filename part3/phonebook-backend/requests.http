@@ -35,3 +35,9 @@ content-type: application/json
   "name": "Ada Lovelace",
   "number": "039248709478"
 }
+
+###
+
+GET https://blooming-journey-91162.herokuapp.com/api/persons
+
+###
