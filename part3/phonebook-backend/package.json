@@ -7,7 +7,7 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "build:ui": "rm -rf build && cd ../../part2/phonebook && npm run build --prod && cp -r build ../../part3/phonebook-backend/",
-    "deploy": "cd ../../ && git push heroku master",
+    "deploy": "cd ../../ && git push --prefix part3/phonebook-backend heroku master",
     "deploy:full": "npm run build:ui && cd ../../ && git add part2 part3 && git commit -m uibuild && npm run deploy",
     "logs:prod": "heroku logs --tail"
   },
