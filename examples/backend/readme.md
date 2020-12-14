@@ -19,6 +19,11 @@
   - [Serving Static Files from the Backend](#serving-static-files-from-the-backend)
   - [Streamlining Deploying of the Frontend](#streamlining-deploying-of-the-frontend)
   - [Proxy](#proxy)
+- [Saving Data to MongoDB](#saving-data-to-mongodb)
+  - [MongoDB](#mongodb)
+  - [Schema](#schema)
+  - [Creating and Saving Objects](#creating-and-saving-objects)
+  - [Fetching Objects from the Database](#fetching-objects-from-the-database)
 
 - Make a folder
 
@@ -730,3 +735,218 @@ A negative aspect of our approach is how complicated it is to deploy the fronten
 There are multiple ways to achieve this (for example placing both backend and frontend code [to the same repository](https://github.com/mars/heroku-cra-node)) but we will not go into those now.
 
 In some situations it may be sensible to deploy the frontend code as its own application. With apps created with create-react-app it is [straightforward](https://github.com/mars/create-react-app-buildpack).
+
+# Saving Data to MongoDB
+
+## MongoDB
+
+You can install & run MongoDB on your own computer. However, the internet is full of Mongo database services that you can use. Our preferred MongoDB provider in this course wil be [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+
+- create and log into your account
+- create a cluster
+  - let's choose *AWS* as the provider & *Frankfurt* as the region, and create a cluster
+- use <kbd>database access</kbd> tab for creating user credentials for the database
+    - note that these are not the same credentials you use for logging into MongoDB Atlas. These will be used for your app to connect to the database
+- grant the user with permissions to read and write to the database
+- next we have to define the IP addresses that are allowed access to the db using <kbd>network access</kbd>
+  - for the sake of simplicity we will allow access from all IP addresses
+- finally we're ready to connect to our db. start by clicking <kbd>connect</kbd>
+  - and choose <kbd>Connect your application</kbd>
+  - ![mongodb connect](readme-imgs/mongodb-connect.png)
+  - the view display the **_MongoDB URI_**, which is the address of the database that we willsupply to the MongoDB client library we will add to our app.
+  - the address looks like this:
+  - ```bash
+    mongodb+srv://fullstack:<PASSWORD>@cluster0-ostce.mongodb.net/test?retryWrites=true
+    ```
+  - we are now ready to use the database
+
+We could use the db directly from our JS code with the [official MongoDB Node.js driver](https://mongodb.github.io/node-mongodb-native/) library, but it's cumbersome to use. We will instead use the [Mongoose](http://mongoosejs.com/index.html) library that offers a higher level API.
+
+Mongoose could be described as an **_object document mapper_** (ODM), and saving JS objects as Mongo docs is straightforward with this library.
+
+- install Mongoose
+
+```bash
+npm install mongoose
+```
+
+Let's not add any code dealing with Mongo to our backend just yet. Instead, let's make a practive app by creating a new file, **_mongo.js_**
+
+```js
+const mongoose = require("mongoose")
+
+if (process.argv.length < 3) {
+  console.log("Please provide the password as an argument: node mongo.js <password>")
+  process.exit(1)
+}
+
+const password = process.argv[2]
+
+const url = `mongodb+srv://fullstack:${password}@cluster0.nmvcx.mongodb.net/test?retryWrites=true&w=majority`
+
+mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true })
+
+const noteSchema = new mongoose.Schema({
+  content: String,
+  date: Date,
+  important: Boolean,
+})
+
+const Note = mongoose.model("Note", noteSchema)
+
+const note = new Note({
+  content: "HTML is Easy",
+  date: new Date(),
+  important: true,
+})
+
+note.save().then((res) => {
+  console.log("note saved")
+  mongoose.connection.close()
+})
+```
+
+**NB:** Depending on which region you selected when building your cluster, the **_MongoDb URI_** may be different from the example above.
+
+The code also assumes that it will be passed the password from the credentials we created in MongoDB Atlas, as a command line parameter. We can access the command line parameter like this:
+
+```js
+const password = process.argv[2]
+```
+
+When the code is run with the command **`node mongo.jd <password>`**, Mongo will add a new document to the database.
+
+**NB:** Please note the password is the password created for the database use, not your MongoDB Atlas password. Also, if you created password with special characters, then you'll need to [URL encode that password](https://docs.atlas.mongodb.com/troubleshoot-connection/#special-characters-in-connection-string-password).
+
+We can view the current state of the database from the MongoDb Atlas from **_Collections_**, in the Overview tab.
+
+![MongoDB Collections](readme-imgs/mongodb-collections.png)
+
+As the view states, the **_document_** matching the note has been added to the **_notes_** collection in the **_test_** database.
+
+![MongoDB Notes](readme-imgs/mongodb-notes.png)
+
+We should give a better name to the database. Like the documentation says, we can change the name of the database from the URI:
+
+![MongoDB Change DB Name](readme-imgs/mongodb-renamedb.png)
+
+- Let's destroy the **_test_** database.
+- Let's now change the name of database referenced in our connection string to **_note-app_** instead, by modifying the URI:
+
+```SH
+mongodb+srv://fullstack:<PASSWORD>@cluster0.nmvcx.mongodb.net/note-app?retryWrites=true&w=majority
+```
+
+- Let's run our code again
+
+The data is now stored in the right db. The view also offers the <kbd>create database</kbd> functionality, that can be used to create new dbs from the website. Creating a db like this is not necessary, since MongoDB Atlas automatically creates a new db when an app tries to connect to a db that does not exist yet.
+
+## Schema
+
+After establishing the connection to the db, we define the [schema](http://mongoosejs.com/docs/guide.html) for a note and the matching [model](http://mongoosejs.com/docs/models.html).
+
+```js
+const noteSchema = new mongoose.Schema({
+  content: String,
+  date: Date,
+  important: Boolean,
+})
+
+const Note = mongoose.model("Note", noteSchema)
+```
+
+- first we define the schema of a note that is stored in the **`noteSchema`** variable. The schema tells Mongoose how the note objects are to be stored in the database.
+- in the **`Note`** model definition, the first **_"Note"_** parameter is the singular name of the model. The name of the collection will be the lowercased plural **_notes_**, because the Mongoose convention is to automatically name collections as the plural (e.g. **_notes_**) when the schema refers to them in the singular (e.g. **_Note_**).
+
+Document dbs like Mongo are **_schemaless_**, meaning that the db itself does not care about the structure of the data that is stored in the db. It is possible to store docs with completely different fields in the same collection.
+
+The idea behind **Mongoose** is that the data stored in the db is given a **_schema at the level of the app_** that defines the shape of the docs stored in any given collection.
+
+## Creating and Saving Objects
+
+Nextç the app creates a new note object with the help of the **_Note_** model:
+
+```js
+const note = new Note({
+  content: "HTML is Easy",
+  date: new Date(),
+  important: false,
+})
+```
+
+Models are so-called **_constructor functions_** that create new JavaScript objects based on the provided parameters. Since the objects are created with the model's constructor function,they have all the properties of the model, which include methods for saving the object to the db.
+
+Savind the object to the db happens with the **`save`** method, that can be provided with an event handler with the **`then`** method:
+
+```js
+note.save().then(result => {
+  console.log("note saved")
+  mongoose.connection.close()
+})
+```
+
+When the object is saved to the db, the event handler provided to **`then`** gets called. The event handler closes the db connection with the command **`mongoose.connection.close()`**. If the connection is not closed, the program will never finish its execution.
+
+The result of the save operation is in the **`result`** parameter of the event handler. The result is not that interesting when we're storing one object to the db. You can print the object to the console if you want to take a closer look at it while implementing your app or during debugging.
+
+
+Let's also save a few more notes by modifying the data in the code and by executing the program again.
+
+```js
+const note = new Note({
+  content: "HTML is Easy",
+  date: new Date(),
+  important: true,
+})
+
+const note2 = new Note({
+  content: "Mongoose makes use of mongo easy",
+  date: new Date(),
+  important: true,
+})
+
+const note3 = new Note({
+  content: "Callback functions suck",
+  date: new Date(),
+  important: true,
+})
+
+note
+  .save()
+  .then(() => note2.save())
+  .then(() => note3.save())
+  .then((res) => {
+    console.log("notes saved")
+    mongoose.connection.close()
+  })
+```
+
+## Fetching Objects from the Database
+
+Let's comment out the code for generating new notes and replace it with the following:
+
+```js
+Note.find({}).then(notes => {
+  notes.forEach(note => {
+    console.log(note)
+  })
+
+  mongoose.connection.close()
+})
+```
+
+When the code is executed, the program prints all the notes stored in the db:
+
+![Mongoose Find](readme-imgs/mongoose-find.png)
+
+The objects are retrieved from the db with the [find](https://mongoosejs.com/docs/api.html#model_Model.find) method of the **`Note`** model. The parameter of the method is an object expressing search conditions. since the parameter is an empty object **`{}`**, we get all of the notes stored in the **`notes`** collection.
+
+The search conditions adhere to the Mongo search query [syntax](https://docs.mongodb.com/manual/reference/operator/).
+
+We could restrict our search to only include important notes like this:
+
+```js
+Note.find({important: true}).then(result => {
+  // ...
+})
+```
