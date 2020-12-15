@@ -24,6 +24,7 @@
   - [Schema](#schema)
   - [Creating and Saving Objects](#creating-and-saving-objects)
   - [Fetching Objects from the Database](#fetching-objects-from-the-database)
+  - [Backend Connected to a Database](#backend-connected-to-a-database)
 
 - Make a folder
 
@@ -950,3 +951,69 @@ Note.find({important: true}).then(result => {
   // ...
 })
 ```
+
+
+## Backend Connected to a Database
+
+
+Let's add the Mongoose definitions to the **index.js** file:
+
+```js
+const mongoose = require("mongoose")
+
+const url = `mongodb+srv://fullstack:${your_password}@cluster0.nmvcx.mongodb.net/note-app?retryWrites=true&w=majority`
+
+mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true })
+
+const noteSchema = new mongoose.Schema({
+  content: String,
+  date: Date,
+  important: Boolean,
+})
+
+const Note = mongoose.model("Note", noteSchema)
+```
+
+Let's change the handler for fetching all notes:
+
+```diff
+app.get("/api/notes", (req, res) => {
+-  res.json(notes)
++ Note.find({}).then((notes) => {
++   res.json(notes)
++ })
+})
+```
+
+We can verify in the browser that the backend works for displaying all of the docs:
+
+![api/notes](readme-imgs/apinotes.png)
+
+The frontend assumes that every object has a unique id in the **`id`** field. We also don't want to return the mongo versioning field **`__v`** to the frontend.
+
+One way to format the objects returned by Mongoose is to [modify](https://stackoverflow.com/questions/7034848/mongodb-output-id-instead-of-id) the **`toJSON`** method of the schema, which is used on all instances of the models produced with that schema:
+
+```js
+noteSchema.set("toJSON", {
+  transform: (doc, returnedObject) => {
+    returnedObject.id = returnedObject._id.toString()
+    delete returnedObject._id
+    delete returnedObject.__v
+  },
+})
+```
+
+Even though the **`_id`** property of Mongoose objects looks like a string, it is in fact an object. The **`toJSON`** method we defined transforms it into a string just to be safe. If we didn't make this change, it would cause more harm for us in the future once we start writing tests.
+
+Let's respond to the HTTP request with a list of objects formatted with the **`toJSON`** method:
+
+```js
+app.get('/api/notes', (request, response) => {
+  Note.find({}).then(notes => {
+    response.json(notes)
+  })
+})
+```
+
+Now the **`notes`** variable is assigned to an array of objects returned by Mongo. When the response is sent in the JSON format, the **`toJSON`** method of each object in the array is called automatically by the **`JSON.stringify`** method.
+

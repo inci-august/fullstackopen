@@ -1,10 +1,37 @@
 const express = require("express")
 const cors = require("cors")
+const mongoose = require("mongoose")
+const { response } = require("express")
+const dotenv = require("dotenv")
+dotenv.config()
+
+const password = process.env.DB_PASSWORD
+
 const app = express()
 
 app.use(cors())
 app.use(express.json())
 app.use(express.static("build"))
+
+const url = `mongodb+srv://fullstack:${password}@cluster0.nmvcx.mongodb.net/note-app?retryWrites=true&w=majority`
+
+mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true })
+
+const noteSchema = new mongoose.Schema({
+  content: String,
+  date: Date,
+  important: Boolean,
+})
+
+noteSchema.set("toJSON", {
+  transform: (doc, returnedObject) => {
+    returnedObject.id = returnedObject._id.toString()
+    delete returnedObject._id
+    delete returnedObject.__v
+  },
+})
+
+const Note = mongoose.model("Note", noteSchema)
 
 const requestLogger = (req, res, next) => {
   console.log("Method: ", req.method)
@@ -52,7 +79,9 @@ app.get("/", (req, res) => {
 })
 
 app.get("/api/notes", (req, res) => {
-  res.json(notes)
+  Note.find({}).then((notes) => {
+    res.json(notes)
+  })
 })
 
 app.get("/api/notes/:id", (req, res) => {
