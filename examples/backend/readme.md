@@ -26,6 +26,7 @@
   - [Fetching Objects from the Database](#fetching-objects-from-the-database)
   - [Backend Connected to a Database](#backend-connected-to-a-database)
   - [Database Configuration into Its Own Module](#database-configuration-into-its-own-module)
+  - [Using Database in Route Handlers](#using-database-in-route-handlers)
 
 - Make a folder
 
@@ -1125,3 +1126,45 @@ app.listen(PORT, () => {
 ```
 
 It's important that **_dotenv_** gets imported before the **_note_** model to ensure that the environment vars from the **_.env_** file are available globally.
+
+## Using Database in Route Handlers
+
+Next, let's change the rest of the backend functionality to use the db.
+
+Creating a new note is accomplished like this:
+
+```js
+app.post("/api/notes", (req, res) => {
+  const body = req.body
+
+  if (body.content === undefined) {
+    return res.status(400).json({
+      error: "content missing",
+    })
+  }
+
+  const note = new Note({
+    content: body.content,
+    important: body.important || false,
+    date: new Date(),
+  })
+
+  note.save().then((savedNote) => {
+    res.json(savedNote)
+  })
+})
+```
+
+The note objects are created with the **`Note`** constructor function. The response is sent inside of the callback function for the **`save`** operation. This ensures that the response is sent only if the operation succeeded.
+
+The **`savedNote`** parameter in the callback function is the saved and newly created note. The data sent back in the response is the formatted version created with the **`toJSON`** method:
+
+Using Mongoose's **`findById`** method, fetching an individual note gets changed into the following:
+
+```js
+app.get("/api/notes/:id", (req, res) => {
+  Note.findById(id).then((note) => {
+    res.json(note)
+  })
+})
+```
