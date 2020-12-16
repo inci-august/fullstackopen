@@ -1,5 +1,3 @@
-# Node.js and Express
-
 - [Node.js and Express](#nodejs-and-express)
   - [Simple Web Server](#simple-web-server)
   - [Expess](#expess)
@@ -27,6 +25,9 @@
   - [Backend Connected to a Database](#backend-connected-to-a-database)
   - [Database Configuration into Its Own Module](#database-configuration-into-its-own-module)
   - [Using Database in Route Handlers](#using-database-in-route-handlers)
+  - [Verifying Frontend and Backend Integration](#verifying-frontend-and-backend-integration)
+
+# Node.js and Express
 
 - Make a folder
 
@@ -1168,3 +1169,12 @@ app.get("/api/notes/:id", (req, res) => {
   })
 })
 ```
+
+## Verifying Frontend and Backend Integration
+
+When the backend gets expanded, its'a good idea to test the backend first with **browser, Postman or the VS Code REST client**. Next, let's try creating a new note after taking the db into use:
+
+![REST test](readme-imgs/rest_test.png)
+
+Only once everything has been verified to work in the backend, is it a good idea to test that the frontend works with the backend. It is highly inefficient to test things exclusively through the frontend.
+
