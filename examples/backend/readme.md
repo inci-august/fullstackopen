@@ -25,6 +25,7 @@
   - [Creating and Saving Objects](#creating-and-saving-objects)
   - [Fetching Objects from the Database](#fetching-objects-from-the-database)
   - [Backend Connected to a Database](#backend-connected-to-a-database)
+  - [Database Configuration into Its Own Module](#database-configuration-into-its-own-module)
 
 - Make a folder
 
@@ -140,7 +141,7 @@ app.listen(PORT, () => {
 })
 ```
 
-We define two *routes* to the app. The event handler function accepts two parameters: **`request`** and **`response`**. **`request`** contains all of the info of the HTTP request, **`response`** parameters is used to define how the request is responded to.
+We define two _routes_ to the app. The event handler function accepts two parameters: **`request`** and **`response`**. **`request`** contains all of the info of the HTTP request, **`response`** parameters is used to define how the request is responded to.
 
 The request to the app's root (**`/`**) is answered by using the **`send`** method of the **`response`** object. Server responds with the string **`<h1>Hello World!</h1>`**, that was passed to the **`send`** method. Since the parameter is a string, express automatically sets the value of the **`Content-Type`** header to be **`text/html`**. The status code of the response defaults to **`200`**.
 
@@ -201,7 +202,6 @@ The URL for the entire collection of note resources is **_www.example.com/api/no
 
 We can execute different operations on resources. The operation to be executed is defined by the HTTP verb:
 
-
 | URL            | Verb         | Functionality                                                    |
 | -------------- | ------------ | ---------------------------------------------------------------- |
 | **`notes/10`** | **`GET`**    | fetches a single resource                                        |
@@ -223,7 +223,7 @@ app.get("/api/notes/:id", (req, res) => {
 })
 ```
 
-- Now **`app.get("api/notes/:id", ...)`** will handle all HTTP GET requests, that are of the form **_/api/notes/SOMETHING_**, where *SOMETHING* is an arbitrary string.
+- Now **`app.get("api/notes/:id", ...)`** will handle all HTTP GET requests, that are of the form **_/api/notes/SOMETHING_**, where _SOMETHING_ is an arbitrary string.
 
 - The **_id_** parameter in the route of a request, can be accessed through the **`req`** object:
 
@@ -312,8 +312,8 @@ Since no data is attached to the response, we use the [status](http://expressjs.
 
 ```js
 res.status(403).end()
-res.status(400).send('Bad Request')
-res.status(404).sendFile('/absolute/path/to/404.png')
+res.status(400).send("Bad Request")
+res.status(404).sendFile("/absolute/path/to/404.png")
 ```
 
 We do not actually need to display anything in the browser because REST APIs are interfaces that are intended for programmatic use, and the error status code is all that is needed.
@@ -398,7 +398,7 @@ The app prints the data that we sent in the request to the console:
 
 ![REST post](readme-imgs/rest_post.png)
 
-The server will not be able to parse the data correctly without the correct value in the header. It won't even try to guess the format of the data, since there's a massive amount of potential ***Content-Types***.
+The server will not be able to parse the data correctly without the correct value in the header. It won't even try to guess the format of the data, since there's a massive amount of potential **_Content-Types_**.
 
 So you need to set **`Content-Type`** correctly.
 
@@ -478,7 +478,7 @@ If the received data is missing a value for the content property, the server wil
 ```js
 if (!body.content) {
   return response.status(400).json({
-    error: 'content missing'
+    error: "content missing",
   })
 }
 ```
@@ -575,7 +575,7 @@ app.use(cors())
 
 ## Application to the Internet
 
-Add a file called ***Procfile*** to the project's root to the Heroku how to start the app:
+Add a file called **_Procfile_** to the project's root to the Heroku how to start the app:
 
 ```js
 web: npm start
@@ -643,7 +643,7 @@ const baseUrl = "api/notes"
 
 const getAll = () => {
   const request = axios.get(baseUrl)
-  return request.then(response => response.data)
+  return request.then((response) => response.data)
 }
 
 // ...
@@ -710,7 +710,7 @@ This is due to changing the backend address to a relative URL:
 const baseUrl = "/api/notes"
 ```
 
-Because in development mode the frontend is at the address localhost:3000, the requests to the backend go to the wrong address *localhost:3000/api/notes*. The backend is at *localhost:3001*.
+Because in development mode the frontend is at the address localhost:3000, the requests to the backend go to the wrong address _localhost:3000/api/notes_. The backend is at _localhost:3001_.
 
 If the project was created with create-react-app, this problem is easy to solve. It is enough to add the following declaration to the **_package.json_** file on the frontend repo:
 
@@ -745,9 +745,9 @@ You can install & run MongoDB on your own computer. However, the internet is ful
 
 - create and log into your account
 - create a cluster
-  - let's choose *AWS* as the provider & *Frankfurt* as the region, and create a cluster
+  - let's choose _AWS_ as the provider & _Frankfurt_ as the region, and create a cluster
 - use <kbd>database access</kbd> tab for creating user credentials for the database
-    - note that these are not the same credentials you use for logging into MongoDB Atlas. These will be used for your app to connect to the database
+  - note that these are not the same credentials you use for logging into MongoDB Atlas. These will be used for your app to connect to the database
 - grant the user with permissions to read and write to the database
 - next we have to define the IP addresses that are allowed access to the db using <kbd>network access</kbd>
   - for the sake of simplicity we will allow access from all IP addresses
@@ -880,7 +880,7 @@ Models are so-called **_constructor functions_** that create new JavaScript obje
 Savind the object to the db happens with the **`save`** method, that can be provided with an event handler with the **`then`** method:
 
 ```js
-note.save().then(result => {
+note.save().then((result) => {
   console.log("note saved")
   mongoose.connection.close()
 })
@@ -889,7 +889,6 @@ note.save().then(result => {
 When the object is saved to the db, the event handler provided to **`then`** gets called. The event handler closes the db connection with the command **`mongoose.connection.close()`**. If the connection is not closed, the program will never finish its execution.
 
 The result of the save operation is in the **`result`** parameter of the event handler. The result is not that interesting when we're storing one object to the db. You can print the object to the console if you want to take a closer look at it while implementing your app or during debugging.
-
 
 Let's also save a few more notes by modifying the data in the code and by executing the program again.
 
@@ -927,8 +926,8 @@ note
 Let's comment out the code for generating new notes and replace it with the following:
 
 ```js
-Note.find({}).then(notes => {
-  notes.forEach(note => {
+Note.find({}).then((notes) => {
+  notes.forEach((note) => {
     console.log(note)
   })
 
@@ -947,14 +946,12 @@ The search conditions adhere to the Mongo search query [syntax](https://docs.mon
 We could restrict our search to only include important notes like this:
 
 ```js
-Note.find({important: true}).then(result => {
+Note.find({ important: true }).then((result) => {
   // ...
 })
 ```
 
-
 ## Backend Connected to a Database
-
 
 Let's add the Mongoose definitions to the **index.js** file:
 
@@ -1008,8 +1005,8 @@ Even though the **`_id`** property of Mongoose objects looks like a string, it i
 Let's respond to the HTTP request with a list of objects formatted with the **`toJSON`** method:
 
 ```js
-app.get('/api/notes', (request, response) => {
-  Note.find({}).then(notes => {
+app.get("/api/notes", (request, response) => {
+  Note.find({}).then((notes) => {
     response.json(notes)
   })
 })
@@ -1017,3 +1014,114 @@ app.get('/api/notes', (request, response) => {
 
 Now the **`notes`** variable is assigned to an array of objects returned by Mongo. When the response is sent in the JSON format, the **`toJSON`** method of each object in the array is called automatically by the **`JSON.stringify`** method.
 
+## Database Configuration into Its Own Module
+
+Let's extract the Mongoose specific code into its own module.
+
+Let's create a new directory for the module called models, and add a file called **_note.js_**:
+
+```js
+const mongoose = require("mongoose")
+
+const url = process.env.MONGODB_URI
+
+console.log("connecting to", url)
+
+mongoose
+  .connect(url, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true })
+  .then((result) => {
+    console.log("connected to MongoDB")
+  })
+  .catch((error) => {
+    console.log("error connecting to MongoDB: ", error.message)
+  })
+
+const noteSchema = new mongoose.Schema({
+  content: String,
+  date: Date,
+  important: Boolean,
+})
+
+noteSchema.set("toJSON", {
+  transform: (document, returnedObject) => {
+    returnedObject.id = returnedObject._id.toString()
+    delete returnedObject._id
+    delete returnedObject.__v
+  },
+})
+
+module.exports = mongoose.model("Note", noteSchema)
+```
+
+Defining Node [modules](https://nodejs.org/docs/latest-v8.x/api/modules.html) differs from the way of defining [ES6 modules](https://fullstackopen.com/en/part2/rendering_a_collection_modules#refactoring-modules).
+
+
+The public interface of the module is defined by setting a value to the **`module.exports`** variable. We will set the value to be the **`Note`** model. The other things defined inside of the module, like the variables **`mongoose`** and **`url`** will not be accessible or visible to users of the module.
+
+Importing the module happens by adding the following line to index.js:
+
+```js
+const Note = require("./models/note")
+```
+
+This way the **`Note`** variable will be assigned to the same object that the module defines.
+
+The way that the connection is made has changed slightly:
+
+```js
+const url = process.env.MONGODB_URI
+
+console.log("connecting to", uri)
+
+mongoose
+  .connect(url, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true })
+  .then((result) => {
+    console.log("connected to MongoDB")
+  })
+  .catch((error) => {
+    console.log("error connecting to MongoDB: ", error.message)
+  })
+```
+
+It's not a good idea to hardcode the address of the database into the code, so instead the address of the db is passed to the app via the **`MONGODB_URI`** environmental variable.
+
+There are many ways to define the value of an environment variable. One way would be to define it when the app is started:
+
+```sh
+MONGODB_URI=address_here npm run dev
+```
+
+A more sophisticated way is to use the [dotenv](https://github.com/motdotla/dotenv#readme) library.
+
+```sh
+npm install dotenv
+```
+
+To use the library, we create a **_.env_** file at the root of the project. The environment variables are defined inside of the file, and it can look like this:
+
+```sh
+MONGODB_URI="mongodb+srv://fullstack:password@cluster0.nmvcx.mongodb.net/app_name?retryWrites=true&w=majority"
+PORT=3001
+```
+
+The **_.env_** file should be gitignored right away, since we do not want to publish any confidential info publicly online!
+
+The environment variables defined in the **_.env_** file can be taken into use with the expression **`require("dotenv").config()`** and you can reference them in your code just like you would reference normal environment variables, with the **`process.env.MONGODB_URI`** syntax.
+
+Let's change the **_index.js_** file in the following way:
+
+```js
+require("dotenv").config()
+const express = require("express")
+const cors = require("cors")
+const Note = require("./models/note")
+
+// ...
+
+const PORT = process.env.PORT
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
+})
+```
+
+It's important that **_dotenv_** gets imported before the **_note_** model to ensure that the environment vars from the **_.env_** file are available globally.
