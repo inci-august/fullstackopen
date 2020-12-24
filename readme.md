@@ -56,3 +56,4 @@
   - [x] 3.10: phonebook backend, step 10
   - [x] 3.11: phonebook backend, step 11
   - [x] 3.12: command-line database
+  - [x] 3.13: phonebook database, step1
