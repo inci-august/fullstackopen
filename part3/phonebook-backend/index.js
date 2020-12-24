@@ -44,8 +44,8 @@ app.use(morgan(":method :url :status :res[content-length] - :response-time ms :p
 // ]
 
 app.get("/api/persons", (req, res) => {
-  Person.find({}).then((people) => {
-    res.json(people)
+  Person.find({}).then((persons) => {
+    res.json(persons)
   })
 })
 
@@ -75,8 +75,6 @@ app.delete("/api/persons/:id", (req, res) => {
 
 app.post("/api/persons", (req, res) => {
   const body = req.body
-  const id = Math.floor(Math.random() * 100000)
-  const nameExists = persons.some((person) => person.name === body.name)
 
   if (!body.name || !body.number) {
     return res.status(400).json({
@@ -84,21 +82,14 @@ app.post("/api/persons", (req, res) => {
     })
   }
 
-  if (nameExists) {
-    return res.status(400).json({
-      error: "name already exists",
-    })
-  }
-
-  const newPerson = {
+  const person = new Person({
     name: body.name,
     number: body.number,
-    id,
-  }
+  })
 
-  persons = persons.concat(newPerson)
-
-  res.json(newPerson)
+  person.save().then((savedPerson) => {
+    res.json(savedPerson)
+  })
 })
 
 const PORT = process.env.PORT
