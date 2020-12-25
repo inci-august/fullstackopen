@@ -26,6 +26,8 @@
   - [Database Configuration into Its Own Module](#database-configuration-into-its-own-module)
   - [Using Database in Route Handlers](#using-database-in-route-handlers)
   - [Verifying Frontend and Backend Integration](#verifying-frontend-and-backend-integration)
+  - [Error Handling](#error-handling)
+  - [Moving Error Handling into Middleware](#moving-error-handling-into-middleware)
 
 # Node.js and Express
 
@@ -1181,3 +1183,134 @@ Only once everything has been verified to work in the backend, is it a good idea
 It's a good idea to integrate the frontend and backend one functionality at a time. First, we could implement fetching all of the notes from the database and test it through the backend endpoint in the browser. After this, we could verify that the frontend works with the new backend. Once everything seems to work, we would move onto the next feature.
 
 Once we introduce a database into the mix, it is useful to inspect the state persisted in the database, e.g., from the control panel in MongoDB Atlas. Quite often little Node helper programs like the mongo.js program we wrote earlier can be very helpful during development.
+
+## Error Handling
+
+If we try to visit the URL of a note with an id that does not actually exist, e.g. http://localhost:3001/api/notes/5c41c90e84d891c15dfa3431 where
+_5c41c90e84d891c15dfa3431_ is not an id stored in the db, then the response will be **`null`**.
+
+Let's change this behavior so that if note with the given id doesn't exist, the server will repond to the request with the HTTP status code **404 not found**. In addition let's implement a simple **`catch`** block to handle cases where the promise returned by the **`findById`** method is **_rejected_**.
+
+```js
+app.get("/api/notes/:id", (req, res) => {
+  Note.findById(req.params.id)
+    .then((note) => {
+      if (note) {
+        res.json(note)
+      } else {
+        res.status(404).end()
+      }
+    })
+    .catch((error) => {
+      console.log(error)
+      res.status(500).end()
+    })
+})
+```
+
+If no matching object is found in the db, the value of **`note`** will be **`null`** and the **`else`** block is executed. This results in a response with the status code **_404 not found_**. If promise returned by the **`findById`** method is rejected, the response will have the status code **_500 internal server error_**. The console display more detailed info about the error.
+
+On top of the non-existing note, there's one more error situation needed to be handled. In this situation, we are trying to fetch a note with a wrong kind of **`id`**, meaning **`id`** that doesn't match the mongo identifier format.
+
+If we make the following request, we will get the error message shown below:
+
+```sh
+Method: GET
+Path:   /api/notes/someInvalidId
+Body:   {}
+---
+{ CastError: Cast to ObjectId failed for value "someInvalidId" at path "_id"
+    at CastError (/Users/mluukkai/opetus/_fullstack/osa3-muisiinpanot/node_modules/mongoose/lib/error/cast.js:27:11)
+    at ObjectId.cast (/Users/mluukkai/opetus/_fullstack/osa3-muisiinpanot/node_modules/mongoose/lib/schema/objectid.js:158:13)
+    ...
+```
+
+Given malformed id as an argument, the **`findById`** method will throw an error causing the returned promise to be rejected. This will cause the callback function defined in the **`catch`** block to be called.
+
+Let's make some small adjustments to the response in the **`catch`** block:
+
+```diff
+app.get("/api/notes/:id", (req, res) => {
+  Note.findById(req.params.id)
+    .then((note) => {
+      if (note) {
+        res.json(note)
+      } else {
+        res.status(404).end()
+      }
+    })
+    .catch((error) => {
+      console.log(error)
+-     res.status(500).end()
++     res.status(400).send({ error: "malformatted id" })
+    })
+})
+```
+
+If the format of the id is incorrect, then we will end up in the error handler defined in the **`catch`** block. The appropriate status code for the situation is [400 Bad Request](https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.1), because the situation fits the description perfectly:
+
+> The request could not be understood by the server due to malformed syntax. The client SHOULD NOT repeat the request without modifications.
+
+We have also added some data to the response to shed some light on the cause of the error.
+
+When dealing with Promises, it's almost always a good idea to add error and exception handling.
+
+It's never a bad idea to print the object that caused the exception to the console in the error handle:
+
+```js
+.catch(error => {
+  console.log(error)
+  reponse.status(400).send({error: "malformatted id"})
+})
+```
+
+The reason the error handler gets called might be something completely different than what you had anticipated. If you log the error to the console, you may save yourself from long and frustrating debugging sessions. Moreover, most modern services to where you deploy your app support some form of logging system that you can use to check these logs. Heroku is one.
+
+Ever time you're working on a project with a backend, **_it is critical to keep an eye on the console output of the backend_**. If you are working on a small screen , it's enough to just see a tiny slice of the output in the background. Any error messages will catch your attention even when the console is far back in the background.
+
+![Error logs](readme-imgs/error_logs.png)
+
+## Moving Error Handling into Middleware
+
+We have written the code for the error handler among the rest of our code. This can be a reasonable solution at times, but there are cases where it is better to implement all error handling in a single place. This can be particularly useful if we later on want to report data related to errors to an external error tracking system like [Sentry](https://sentry.io/welcome/).
+
+Let's change the handler for the **_/api/notes/:id_** route, so that it passes the error forward with the **`next`** function. The next function is passed to the handler as the third parameter.
+
+```diff
+-app.get("/api/notes/:id", (req, res) => {
++app.get("/api/notes/:id", (req, res, next) => {
+   Note.findById(req.params.id)
+     .then((note) => {
+       if (note) {
+         res.json(note)
+       } else {
+         res.status(404).end()
+       }
+     })
+-    .catch((error) => {
+-      console.log(error)
+-      res.status(400).send({ error: "malformatted id" })
+-    })
++    .catch((error) => next(error))
+})
+```
+
+The error that is passed forwards is given to the **`next`** function as a parameter. If **`next`** was called without a parameter, then the execution would simply move onto the next route or middleware. If the **`next`** function is called with a parameter, then the execution will continue to the **_error handler middleware_**.
+
+Express [error handlers](https://expressjs.com/en/guide/error-handling.html) are middleware that are defined with a function that accepts **_four parameters_**. Our error handler looks like this:
+
+```js
+const errorHandler = (error, req, res, next) => {
+  console.error(error.message)
+
+  if (error.name === "CastError") {
+    return res.status(400).send({ error: "malformatted id" })
+  }
+
+  next(error)
+}
+
+app.use(errorHandler)
+```
+
+The error handler checks if the error is a **_CastError_** exception, in which case we know that the error was caused by an invalid object id for Mongo. In this situation the error handler will send a response to the browsser with the response object passed as a parameter. In all other error situations, the middleware passes the error forward to the default Express error handler.
