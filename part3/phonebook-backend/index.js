@@ -5,9 +5,9 @@ const cors = require("cors")
 const app = express()
 const Person = require("./models/person")
 
-app.use(cors())
-app.use(express.json())
 app.use(express.static("build"))
+app.use(express.json())
+app.use(cors())
 
 morgan.token("payload", function (req, res) {
   return JSON.stringify(req.body)
@@ -67,10 +67,11 @@ app.get("/api/persons/:id", (req, res) => {
 })
 
 app.delete("/api/persons/:id", (req, res) => {
-  const id = Number(req.params.id)
-  persons = persons.filter((person) => person.id !== id)
-
-  res.status(204).end()
+  Person.findByIdAndRemove(req.params.id)
+    .then((result) => {
+      res.status(204).end()
+    })
+    .catch((error) => console.log(error))
 })
 
 app.post("/api/persons", (req, res) => {
@@ -91,6 +92,12 @@ app.post("/api/persons", (req, res) => {
     res.json(savedPerson)
   })
 })
+
+const unknownEndpoint = (req, res) => {
+  res.status(404).send({ error: "unknown endpoint" })
+}
+
+app.use(unknownEndpoint)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {

@@ -58,3 +58,4 @@
   - [x] 3.12: command-line database
   - [x] 3.13: phonebook database, step1
   - [x] 3.14: phonebook database, step2
+  - [x] 3.15: phonebook database, step3
