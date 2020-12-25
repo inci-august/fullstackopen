@@ -29,6 +29,7 @@
   - [Error Handling](#error-handling)
   - [Moving Error Handling into Middleware](#moving-error-handling-into-middleware)
   - [The Order of Middleware Loading](#the-order-of-middleware-loading)
+  - [Other Operations](#other-operations)
 
 # Node.js and Express
 
@@ -1384,3 +1385,47 @@ app.get("/api/notes", (req, res) => {
 
 Now the handling of unknown endpoints is ordered **_before the HTTP request handler_**. Since the unknown endpoint handler responds to all requests with **_404 unknown endpoint_**, no routes or middleware will be called after the response  has been sent by unknown endpoint middleware. The only exception to this is the error handler wihch needs to come at the very end, after the unknown endpoints handler.
 
+## Other Operations
+
+Let's add some missing functionality to our app, including deleting and updating an individual note.
+
+The easiest way to delete a note from the database is with the [findByIdAndRemove](https://mongoosejs.com/docs/api.html#model_Model.findByIdAndRemove) method:
+
+```js
+app.delete("/api/notes/:id", (req, res) => {
+  Note.findByIdAndRemove(req.params.id)
+    .then((result) => {
+      res.status(204).end()
+    })
+    .catch((error) => next(error))
+})
+```
+
+In both of the "successful" cases of deleting a resource, the backend responds with the status code **_204 no content_**. The two different cases are deleting a note that exists, and deleting a note that does not exist in the db. The **`result`** callback parameter could be used for checking if a resource actually was deleted, and we could use that info for returning different status codes for the two cases if we deemed it necessary. Any exception that occurs is passed onto the error handler.
+
+The toggling of the importance of a note can be easily accomplished with the [findByIdAndUpdate](https://mongoosejs.com/docs/api.html#model_Model.findByIdAndUpdate) method.
+
+```js
+app.put("/api/notes/:id", (req, res, next) => {
+  const body = req.body
+
+  const note = {
+    content: body.content,
+    important: body.important,
+  }
+
+  Note.findByIdAndUpdate(req.params.id, note, { new: true })
+    .then((updatedNote) => {
+      res.json(updatedNote)
+    })
+    .catch((error) => next(error))
+})
+```
+
+In the code above, we also allow the content of the note to be edited. However, we will not support changing the creation date for obvious reasons.
+
+Notice that the **`findByIdAndUpdate`** method receives a regular JS object as its parameter, and not a new note object created with the **`Note`** constructor function.
+
+There is one important details regarding the use of the **`findByIdAndUpdate`** method. By default, the **`updatedNote`** parameter of the event handler receives the original document [without the modifications](https://mongoosejs.com/docs/api.html#model_Model.findByIdAndUpdate). We added the optional **`{ new: true }`** parameter, which will cause our event handler to be called with the new modified document instead of the original.
+
+After testing the backend directly with Post and the VS Code REST client, we can verify that it seems to work. The frontend also appears to work with the backend using the db.

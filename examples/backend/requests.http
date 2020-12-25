@@ -3,6 +3,10 @@ GET http://localhost:3001/api/notes
 
 ###
 
+GET http://localhost:3001/api/notes/5fda375b4ab69a27483e084b
+
+###
+
 POST http://localhost:3001/api/notes
 content-type: application/json
 
@@ -10,5 +14,19 @@ content-type: application/json
     "content": "REST client is a good tool for testing REST apis",
     "important": true
 }
+
+###
+
+PUT http://localhost:3001/api/notes/5fda375b4ab69a27483e084b
+content-type: application/json
+
+{
+    "content": "REST client is THE BEST tool for testing REST apis",
+    "important": false
+}
+
+###
+
+DELETE http://localhost:3001/api/notes/5fd7d30870aeea9b84819a02
 
 ###
