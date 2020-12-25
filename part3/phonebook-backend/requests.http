@@ -41,3 +41,11 @@ content-type: application/json
 GET https://blooming-journey-91162.herokuapp.com/api/persons
 
 ###
+
+PUT http://localhost:3001/api/persons/5fe51e2a3c64444b98bda8a4
+content-type: application/json
+
+{
+    "name": "test",
+    "number": 123456
+}
