@@ -3,7 +3,12 @@ const mongoose = require("mongoose")
 const url = process.env.MONGODB_URI
 
 mongoose
-  .connect(url, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true })
+  .connect(url, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false,
+    useCreateIndex: true,
+  })
   .then((result) => {
     console.log("connected to MongoDB")
   })
@@ -12,8 +17,15 @@ mongoose
   })
 
 const noteSchema = new mongoose.Schema({
-  content: String,
-  date: Date,
+  content: {
+    type: String,
+    minlength: 5,
+    required: true,
+  },
+  date: {
+    type: Date,
+    required: true,
+  },
   important: Boolean,
 })
 

@@ -30,6 +30,9 @@
   - [Moving Error Handling into Middleware](#moving-error-handling-into-middleware)
   - [The Order of Middleware Loading](#the-order-of-middleware-loading)
   - [Other Operations](#other-operations)
+- [Validation and ESLint](#validation-and-eslint)
+  - [Promise Chaining](#promise-chaining)
+  - [Deploying the Database Backend to Production](#deploying-the-database-backend-to-production)
 
 # Node.js and Express
 
@@ -1429,3 +1432,162 @@ Notice that the **`findByIdAndUpdate`** method receives a regular JS object as i
 There is one important details regarding the use of the **`findByIdAndUpdate`** method. By default, the **`updatedNote`** parameter of the event handler receives the original document [without the modifications](https://mongoosejs.com/docs/api.html#model_Model.findByIdAndUpdate). We added the optional **`{ new: true }`** parameter, which will cause our event handler to be called with the new modified document instead of the original.
 
 After testing the backend directly with Post and the VS Code REST client, we can verify that it seems to work. The frontend also appears to work with the backend using the db.
+
+# Validation and ESLint
+
+There are usually constraints that we want to apply to the data that is stored in our app's db. Our app shouldn't accept notes that have a missing or empty **_content_** property. The validity of the note is checked in the route handler:
+
+```js
+app.post("/api/notes", (req, res) => {
+  const body = req.body
+
+  if (body.content === undefined) {
+    return res.status(400).json({
+      error: "content missing",
+    })
+  }
+
+  // ...
+})
+```
+
+If the note does not have the **_content_** property, we respond to the request with the status code **_400 bad request_**.
+
+One smarter way of validating the format of the data before it is stored in the database, is to use the [validation](https://mongoosejs.com/docs/validation.html) functionality available in Mongoose.
+
+We can define specific validation rules for each field in the schema:
+
+```js
+const noteSchema = new mongoose.Schema({
+  content: {
+    type: String,
+    minlength: 5,
+    required: true,
+  },
+  date: {
+    type: Date,
+    required: true,
+  },
+  important: Boolean,
+})
+```
+
+The **`minlength`** and **`required`** validators are [built-in](https://mongoosejs.com/docs/validation.html#built-in-validators) and provided by Mongoose. The Mongoose [custom validator](https://mongoosejs.com/docs/validation.html#custom-validators) functionality allows us to create new validators, if none of the built-in ones cover our needs.
+
+If we try to store an object in the db that breaks one of the constraints, the operation will throw an exception. Let's change our handler for creating a new note so that it passes any potential exceptions to the error handler middleware:
+
+```js
+app.post("/api/notes", (req, res, next) => {
+  const body = req.body
+
+  const note = new Note({
+    content: body.content,
+    important: body.important || false,
+    date: new Date(),
+  })
+
+  note
+    .save()
+    .then((savedNote) => {
+      res.json(savedNote.toJSON())
+    })
+    .catch((error) => next(error))
+})
+```
+
+Let's expand the error handler to deal with these validation errors:
+
+```js
+const errorHandler = (error, req, res, next) => {
+  console.error(error.message)
+
+  if (error.name === "CastError") {
+    return res.status(400).send({ error: "malformatted id" })
+  } else if (error.name === "ValidationError") {
+    return res.status(400).json({ error: error.message })
+  }
+
+  next(error)
+}
+```
+
+When validating an object fails, we return the following default error message from Mongoose:
+
+![Validation Error](readme-imgs/validation_error.png)
+
+## Promise Chaining
+
+Many of the route handlers changed the response data into the right format by implicitly calling the **`toJSON`** method from **`response.json`**. For the sake of an example, we can also perform this operation explicitly by calling the **`toJSON`** method on the object passed as a parameter to **`then`**.
+
+```js
+app.post("/api/notes", (req, res, next) => {
+  // ...
+
+  note
+    .save()
+    .then((savedNote) => {
+      res.json(savedNote.toJSON())
+    })
+    .catch((error) => next(error))
+})
+```
+
+We can accomplish the same functionality in a much cleaner way with [promise chaining](https://javascript.info/promise-chaining):
+
+```js
+app.post("/api/notes", (req, res, next) => {
+  // ...
+
+  note
+    .save()
+    .then((savedNote) => {
+      savedNote.toJSON()
+    })
+    .then((savedAndFormattedNote) => {
+      res.json(savedAndFormattedNote)
+    })
+    .catch((error) => next(error))
+})
+```
+
+In the first **`then`** we receive **`savedNote`** object returned by Mongoose and format it. The result of the operation is returned. Then [as we discussed earlier](#database-configuration-into-its-own-module), the **`then`** method of a promise also returns a promise and we can access the formatted note by registering a new callback function with the **`then`** method.
+
+We can clean up our code even more by using the more compact wyntax for arrow functions:
+
+```js
+app.post("/api/notes", (req, res, next) => {
+  // ...
+
+  note
+    .save()
+    .then((savedNote) => savedNote.toJSON())
+    .then((savedAndFormattedNote) => res.json(savedAndFormattedNote))
+    .catch((error) => next(error))
+})
+```
+
+In this example, Promise chaining does not provide much of a benefit. The situation would change if there were many asynchronous operations that had to be done in sequence. The **`async/await`** syntax in JS, taht we'll learn in the next part will make writing subsequent asynchronous operations a lot easier.
+
+## Deploying the Database Backend to Production
+
+The app should work almost as-is in Heroku. We do have to generate a new production build of the frontend due to the changes that we have made to our frontend.
+
+The environment variables defined in dotenv will only be used when the backend is not in **_production mode_**, i.e. Heroku.
+
+We defined the environment variables for development in file **_.env_**, but the environment variable that defines the database URL in production should be set to Heroku wih the **`heroku config:set`** command.
+
+```bash
+heroku config:set MONGODB_URI=mongodb+srv://fullstack:secretpasswordhere@cluster0-ostce.mongodb.net/note-app?retryWrites=true
+```
+
+**NB:** if the command causes an error, give the value of MONGODB_URI in apostrophes:
+
+```bash
+heroku config:set MONGODB_URI='mongodb+srv://fullstack:secretpasswordhere@cluster0-ostce.mongodb.net/note-app?retryWrites=true'
+```
+
+The application should now work. Sometimes things don't go according to plan. If there are problems, **_heroku logs_** will be there to help. My own app did not work after making the changes. The logs showed the following:
+
+![heroku logs](readme-imgs/heroku_logs.png)
+
+For some reason the URL of the db was undefined. The heroku config command revealed that I had accidentally defined the URL to **`MONGO_URI`** environment variable, when the code expected it to be **`MONGODB_URI`**
