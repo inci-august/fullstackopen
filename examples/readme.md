@@ -33,6 +33,7 @@
 - [Validation and ESLint](#validation-and-eslint)
   - [Promise Chaining](#promise-chaining)
   - [Deploying the Database Backend to Production](#deploying-the-database-backend-to-production)
+  - [Lint](#lint)
 
 # Node.js and Express
 
@@ -1593,3 +1594,165 @@ The application should now work. Sometimes things don't go according to plan. If
 ![heroku logs](readme-imgs/heroku_logs.png)
 
 For some reason the URL of the db was undefined. The heroku config command revealed that I had accidentally defined the URL to **`MONGO_URI`** environment variable, when the code expected it to be **`MONGODB_URI`**
+
+## Lint
+
+In the JS universe, the current leading tool for [static analysis](https://en.wikipedia.org/wiki/Static_program_analysis) aka. "linting" is [ESLint](https://eslint.org/).
+
+Install ESLint as a development dependency to the backend project with the command:
+
+```bash
+npm install eslint --save-dev
+```
+
+After this we can initialize a default ESlint configuration with the command:
+
+```bash
+node_modules/.bin/eslint --init
+```
+
+We'll answer all of the questions:
+
+![ESLint Questions](readme-imgs/eslint-questions.png)
+
+The configuration will be saved in **`.eslintrc.js`** file:
+
+```js
+module.exports = {
+    'env': {
+        'commonjs': true,
+        'es6': true,
+        'node': true
+    },
+    'extends': 'eslint:recommended',
+    'globals': {
+        'Atomics': 'readonly',
+        'SharedArrayBuffer': 'readonly'
+    },
+    'parserOptions': {
+        'ecmaVersion': 2018
+    },
+    'rules': {
+        'indent': [
+            'error',
+            4
+        ],
+        'linebreak-style': [
+            'error',
+            'unix'
+        ],
+        'quotes': [
+            'error',
+            'single'
+        ],
+        'semi': [
+            'error',
+            'never'
+        ]
+    }
+}
+```
+
+Let's immediately change the rule concerning indentation, so that the indentation level is two spaces.
+
+```js
+"indent": [
+  "error",
+  2
+]
+```
+
+Inspecting and validating a file like **`index.js`** can be done with the following command:
+
+```bash
+node_modules/.bin/eslint index.js
+```
+
+It is recommended to create a separate **`npm script`** for linting:
+
+```js
+{
+  // ...
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    // ...
+    "lint": "eslint ."
+  }
+}
+```
+
+Now the **`npm run lint`** command will check every file in the project.
+
+Also the files in the **`build`** directory get checked when the command is run. We do not want this to happen, and we can accomplish this by creating an .eslintignore file in the project's root with the following content:
+
+```txt
+build
+```
+
+This causes the entire **`build`** directory to not be checked by ESLint.
+
+A better alternative to executing the linter from the command line is to configure a **_eslint-plugin_** to the editor, that runs the linter continuously. By using the plugin you will see errors in your code immediately. You can find more info about the VSCode ESLint plugin [here](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint).
+
+The VS Code ESLint plugin will underline style violations with a red line.
+
+This makes errors easy to spot and fix right away.
+
+ESLint has a vast array of rules that are easy to take into use by editing the **_.eslintrc.js_** file.
+
+Let's add the [eqeqeq](https://eslint.org/docs/rules/eqeqeq) rule that warns us, if equality is checked with anything but the triple equals operator. The rule is added under the **_rules_** field in the config file:
+
+```js
+{
+  // ...
+  "rules": {
+    // ...
+    eqeqeq: ["error", "always"]
+  }
+}
+```
+
+While we're at it, let's make a few other changes to the rules.
+
+Let's prevent unnecessary [trailing spaces](https://eslint.org/docs/rules/no-trailing-spaces) at the ends of lines, let's require that [there is always a space before and after curly braces](https://eslint.org/docs/rules/object-curly-spacing), and let's also demand a consistent use of whitespaces in the function paramters of arrow functions:
+
+```js
+{
+  // ...
+  "rules": {
+    // ...
+    eqeqeq: "error",
+    "no-trailing-spaces": "error",
+    "object-curly-spacing": ["error", "always"],
+    "arrow-spacing": ["error", { before: true, after: true }],
+  }
+}
+```
+
+Our default configuration takes a bunch of predetermined rules into use from **_eslint:recommended_**:
+
+```js
+  "extends": "eslint:recommended",
+```
+
+This includes a rule that warns about **`console.log()`** commands. [Disabling](https://eslint.org/docs/user-guide/configuring#configuring-rules) a rule can be accomplished by defining its "value" as 0 in the configuration file. Let's do this for the **_no-console_** rule in the meantime.
+
+```js
+{
+  // ...
+  "rules": {
+    // ...
+    "no-console": 0
+  }
+}
+```
+
+**NB** when you make changes to the **_.eslintrc.js_** file, it is recommended to run the linter from the command line. this will verify that the configuration file is correctly formatted:
+
+``` bash
+npm run lint
+```
+If there is something wrong in your configuration file, the lint plugin can behave quite erratically.
+
+Many companies define coding standards that are enforced throughout the organization through the ESlint configuration file. It is not recommended to keep reinventing the wheel over and over again, and it can be a good idea to adopt a ready-made configuration from someone else's project into yours. Recently many projects have adopted the Airbnb [JavaScript style guide](https://github.com/airbnb/javascript) by taking Airbnb's [ESLint](https://github.com/airbnb/javascript/tree/master/packages/eslint-config-airbnb) configuration into use.
+
