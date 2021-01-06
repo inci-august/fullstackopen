@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
+    "lint": "eslint .",
     "build:ui": "rm -rf build && cd ../../part2/phonebook && rm -rf build && npm run build --prod && cp -r build ../../part3/phonebook-backend/",
     "deploy": "cd ../../ && git push heroku master",
     "deploy:full": "npm run build:ui && cd ../../ && git add part2 part3 && git commit -m uibuild && cd part3/phonebook-backend && npm run deploy",
@@ -22,6 +23,7 @@
     "morgan": "^1.10.0"
   },
   "devDependencies": {
+    "eslint": "^7.17.0",
     "nodemon": "^2.0.6"
   }
 }

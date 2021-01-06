@@ -6,7 +6,9 @@ if (process.argv.length < 3) {
 }
 
 if (process.argv.length > 5) {
-  console.log("Please provide maximum of 3 arguments: node mongo.js <password> <name> <number>")
+  console.log(
+    "Please provide maximum of 3 arguments: node mongo.js <password> <name> <number>"
+  )
   process.exit(1)
 }
 
@@ -16,7 +18,12 @@ const number = process.argv[4]
 
 const url = `mongodb+srv://fullstack:${password}@cluster0.nmvcx.mongodb.net/phonebook?retryWrites=true&w=majority`
 
-mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true })
+mongoose.connect(url, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useFindAndModify: false,
+  useCreateIndex: true,
+})
 
 const personSchema = new mongoose.Schema({
   name: String,
@@ -31,7 +38,7 @@ const person = new Person({
 })
 
 process.argv.length > 3
-  ? person.save().then((res) => {
+  ? person.save().then(() => {
       console.log(`added ${name} number ${number} to phonebook`)
       mongoose.connection.close()
     })
