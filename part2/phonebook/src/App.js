@@ -78,15 +78,22 @@ const App = () => {
             setNewNumber("")
           })
           .catch((err) => {
-            setErrorMessage(
-              `Information of ${changedPerson.name} has already been removed from server`
-            )
-            setTimeout(() => {
-              setErrorMessage(null)
-            }, 5000)
-            setPersons(persons.filter((p) => p.id !== id))
-            setNewName("")
-            setNewNumber("")
+            if (err.response.data) {
+              setErrorMessage(err.response.data.error)
+              setTimeout(() => {
+                setErrorMessage(null)
+              }, 5000)
+            } else {
+              setErrorMessage(
+                `Information of ${changedPerson.name} has already been removed from server`
+              )
+              setPersons(persons.filter((p) => p.id !== id))
+              setNewName("")
+              setNewNumber("")
+              setTimeout(() => {
+                setErrorMessage(null)
+              }, 5000)
+            }
           })
         return
       } else {
@@ -103,19 +110,28 @@ const App = () => {
         setSuccessMessage(`Added ${returnedPerson.name}`)
         setTimeout(() => {
           setSuccessMessage(null)
-        }, 5000)
+        }, 3000)
         setNewName("")
         setNewNumber("")
       })
-      .catch((err) => alert(err))
+      .catch((err) => {
+        setErrorMessage(err.response.data.error)
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
+      })
   }
 
   const handleDelete = (id) => {
     if (window.confirm("Do you really want to delete this person")) {
       personService
         .remove(id)
-        .then((returnedPerson) => {
+        .then(() => {
+          setSuccessMessage(`Deleted ${persons.find((person) => person.id === id).name}`)
           setPersons(persons.filter((person) => person.id !== id))
+          setTimeout(() => {
+            setSuccessMessage(null)
+          }, 3000)
         })
         .catch((err) => alert(err))
     } else {

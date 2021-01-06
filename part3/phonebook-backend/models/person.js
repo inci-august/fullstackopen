@@ -20,9 +20,13 @@ mongoose
 const personSchema = new mongoose.Schema({
   name: {
     type: String,
+    minLength: 3,
     unique: true,
   },
-  number: String,
+  number: {
+    type: String,
+    match: /^\d{8}$/g,
+  },
 })
 
 personSchema.plugin(uniqueValidator)

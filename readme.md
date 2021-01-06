@@ -63,3 +63,4 @@
   - [x] 3.17: phonebook database, step5
   - [x] 3.18: phonebook database, step6
   - [x] 3.19: phonebook database, step7
+  - [x] 3.20: phonebook database, step8
