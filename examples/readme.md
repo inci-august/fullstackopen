@@ -1515,6 +1515,8 @@ When validating an object fails, we return the following default error message f
 
 ![Validation Error](readme-imgs/validation_error.png)
 
+Mongoose doesn't have a built-in validator for making sure that the value being added is unique. For this, we can use npm package [mongoose-unique-validator](https://github.com/blakehaswell/mongoose-unique-validator#readme)
+
 ## Promise Chaining
 
 Many of the route handlers changed the response data into the right format by implicitly calling the **`toJSON`** method from **`response.json`**. For the sake of an example, we can also perform this operation explicitly by calling the **`toJSON`** method on the object passed as a parameter to **`then`**.
