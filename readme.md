@@ -67,3 +67,5 @@
   - [x] 3.21: deploying the database backend to production
   - [x] 3.22: lint configuration
 - [ ] Part 4
+  - [x] 4.1: blog list, step 1
+  - [x] 4.2: blog list, step 2
