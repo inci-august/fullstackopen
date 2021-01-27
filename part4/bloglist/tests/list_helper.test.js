@@ -72,10 +72,10 @@ test("dummy returns one", () => {
 })
 
 describe("total likes", () => {
-  test("of empty list is zero", () => {
+  test("of empty list returns error", () => {
     const result = listHelper.totalLikes([])
 
-    expect(result).toBe(0)
+    expect(result).toBe("Blog list is empty")
   })
 
   test("when list has only one blog, equals the likes of that", () => {
@@ -91,11 +91,11 @@ describe("total likes", () => {
   })
 })
 
-describe.only("favorite blog", () => {
-  test("of empty list is zero", () => {
+describe("favorite blog", () => {
+  test("of empty list returns error", () => {
     const result = listHelper.favoriteBlog([])
 
-    expect(result).toBe(0)
+    expect(result).toBe("Blog list is empty")
   })
 
   test("when list has only one blog, equals that blog", () => {
@@ -115,6 +115,32 @@ describe.only("favorite blog", () => {
       title: "Canonical string reduction",
       author: "Edsger W. Dijkstra",
       likes: 12,
+    })
+  })
+})
+
+describe.only("most blogs", () => {
+  test("of empty list returns error", () => {
+    const result = listHelper.mostBlogs([])
+
+    expect(result).toBe("Blog list is empty")
+  })
+
+  test("when list has only one blog, equals that blog", () => {
+    const result = listHelper.mostBlogs(listWithOneBlog)
+
+    expect(result).toMatchObject({
+      author: "Edsger W. Dijkstra",
+      blogs: 1,
+    })
+  })
+
+  test("of a bigger list is the author with the most blogs", () => {
+    const result = listHelper.mostBlogs(blogs)
+
+    expect(result).toMatchObject({
+      author: "Robert C. Martin",
+      blogs: 3,
     })
   })
 })
