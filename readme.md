@@ -71,3 +71,4 @@
   - [x] 4.2: blog list, step2
   - [x] 4.3: helper functions and unit tests, step1
   - [x] 4.4: helper functions and unit tests, step2
+  - [x] 4.5: helper functions and unit tests, step3
