@@ -119,14 +119,14 @@ describe("favorite blog", () => {
   })
 })
 
-describe.only("most blogs", () => {
+describe("most blogs", () => {
   test("of empty list returns error", () => {
     const result = listHelper.mostBlogs([])
 
     expect(result).toBe("Blog list is empty")
   })
 
-  test("when list has only one blog, equals that blog", () => {
+  test("when list has only one blog, equals that author", () => {
     const result = listHelper.mostBlogs(listWithOneBlog)
 
     expect(result).toMatchObject({
@@ -141,6 +141,32 @@ describe.only("most blogs", () => {
     expect(result).toMatchObject({
       author: "Robert C. Martin",
       blogs: 3,
+    })
+  })
+})
+
+describe.only("most likes", () => {
+  test("of empty list returns error", () => {
+    const result = listHelper.mostLikes([])
+
+    expect(result).toBe("Blog list is empty")
+  })
+
+  test("when list has only one blog, equals that author", () => {
+    const result = listHelper.mostLikes(listWithOneBlog)
+
+    expect(result).toMatchObject({
+      author: "Edsger W. Dijkstra",
+      likes: 5,
+    })
+  })
+
+  test("of a bigger list is the author with the most likes", () => {
+    const result = listHelper.mostLikes(blogs)
+
+    expect(result).toMatchObject({
+      author: "Edsger W. Dijkstra",
+      likes: 17,
     })
   })
 })

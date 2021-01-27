@@ -73,3 +73,4 @@
   - [x] 4.4: helper functions and unit tests, step2
   - [x] 4.5: helper functions and unit tests, step3
   - [x] 4.6: helper functions and unit tests, step4
+  - [x] 4.7: helper functions and unit tests, step5
