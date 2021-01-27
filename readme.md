@@ -37,24 +37,24 @@
   - [x] 2.12: data for countries, step1
   - [x] 2.13: data for countries, step2
   - [x] 2.14: data for countries, step3
-  - [x] 2.15: the phonebook, step 7
-  - [x] 2.16: the phonebook, step 8
-  - [x] 2.17: the phonebook, step 9
-  - [x] 2.18: the phonebook, step 10
-  - [x] 2.19: the phonebook, step 11
-  - [x] 2.20: the phonebook, step 12
+  - [x] 2.15: the phonebook, step7
+  - [x] 2.16: the phonebook, step8
+  - [x] 2.17: the phonebook, step9
+  - [x] 2.18: the phonebook, step10
+  - [x] 2.19: the phonebook, step11
+  - [x] 2.20: the phonebook, step12
 - [x] Part 3
-  - [x] 3.1: phonebook backend, step 1
-  - [x] 3.2: phonebook backend, step 2
-  - [x] 3.3: phonebook backend, step 3
-  - [x] 3.4: phonebook backend, step 4
-  - [x] 3.5: phonebook backend, step 5
-  - [x] 3.6: phonebook backend, step 6
-  - [x] 3.7: phonebook backend, step 7
-  - [x] 3.8: phonebook backend, step 8
-  - [x] 3.9: phonebook backend, step 9
-  - [x] 3.10: phonebook backend, step 10
-  - [x] 3.11: phonebook backend, step 11
+  - [x] 3.1: phonebook backend, step1
+  - [x] 3.2: phonebook backend, step2
+  - [x] 3.3: phonebook backend, step3
+  - [x] 3.4: phonebook backend, step4
+  - [x] 3.5: phonebook backend, step5
+  - [x] 3.6: phonebook backend, step6
+  - [x] 3.7: phonebook backend, step7
+  - [x] 3.8: phonebook backend, step8
+  - [x] 3.9: phonebook backend, step9
+  - [x] 3.10: phonebook backend, step10
+  - [x] 3.11: phonebook backend, step11
   - [x] 3.12: command-line database
   - [x] 3.13: phonebook database, step1
   - [x] 3.14: phonebook database, step2
@@ -67,5 +67,6 @@
   - [x] 3.21: deploying the database backend to production
   - [x] 3.22: lint configuration
 - [ ] Part 4
-  - [x] 4.1: blog list, step 1
-  - [x] 4.2: blog list, step 2
+  - [x] 4.1: blog list, step1
+  - [x] 4.2: blog list, step2
+  - [x] 4.3: helper functions and unit tests, step1
