@@ -1,6 +1,8 @@
 # Structure of Backend Application, Introduction to Testing
 
-- [Project Structure](#project-structure)
+- [Structure of Backend Application, Introduction to Testing](#structure-of-backend-application-introduction-to-testing)
+  - [Project Structure](#project-structure)
+  - [Testing Node Applications](#testing-node-applications)
 
 ## Project Structure
 
@@ -321,3 +323,217 @@ To recap, the directory structure loooks like this after the changes have been m
 ```
 
 There is no strict directory structure or file naming convention that is required for Express applications. To contrast this, Ruby on Rails does require a specific structure. Our current structure simply follows some of the best practices you can come accross on the internet.
+
+## Testing Node Applications
+
+Let's start our testing journey by looking at unit tests. The logic of our app is so simple that there is not much that makes sense to test with unit tests. Let's create a new file **_utils/for_testing.js_** and write a couple of simple function that we can use for test writing practice:
+
+```js
+const palindrome = (string) => {
+  return string.split("").reverse().join("")
+}
+
+const average = (array) => {
+  const reducer = (sum, item) => {
+    return sum + item
+  }
+
+  return array.reduce(reducer, 0) / array.length
+}
+
+module.exports = {
+  palindrome,
+  average,
+}
+```
+
+The **`average`** function uses the array [reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce) method.
+
+There are many different libraries or **_test runners_** for JavaScript. In this course we will be using a testing library developed and used internally by Facebook called [jest](https://jestjs.io/), that resembles the previous king of JS testing libraries [Mocha](https://mochajs.org/). Other alternatives do exist, like [ava](https://github.com/avajs/ava) that has gained popularity in some circles.
+
+Jest works well for testing backends, and it shiines when it comes to testing React applications.
+
+> **Windows users:** Jest may not work if the path of the project directory contains a directory that has spaces in its name.
+
+Since tests are only executed during the development of our app, we will install **_jest_** as a development dependency with the command:
+
+```bash
+npm install --save-dev jest
+```
+
+Let's define the npm script **`test`** to execute tests with Jest and to report about the test execution with the **_verbose_** style:
+
+```json
+{
+  // ...
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "lint": "eslint .",
+    "build:ui": "rm -rf build && cd ../notes && npm run build && cp -r build ../backend/",
+    "deploy": "git push heroku master",
+    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && npm run deploy",
+    "logs:prod": "heroku logs --tail",
+    "test": "jest --verbose"
+  },
+  // ...
+}
+```
+
+Jest requires one to specify that the execution environment is Node. This can be done by adding the following to the end of **_package.json_**:
+
+```json
+{
+  // ...
+  "jest": {
+    "testEnvironment": "node"
+  }
+}
+```
+
+Alternatively, Jest can loook for a configuration file with the default name **_jest.config.js_**, where we can define the execution environment like this:
+
+```js
+module.exports = {
+  testEnvrironment: "node"
+}
+```
+
+Let's create a separate directory for our tests called **_tests_** and create a new file called **_palindrome.test.js_** with the following contents:
+
+```js
+const palindrome = require("../utils/for_testing").palindrome
+
+test("palindrome of a", () => {
+  const result = palindrome("a")
+
+  expect(result).toBe("a")
+})
+
+test("palindrome of react", () => {
+  const result = palindrome("react")
+
+  expect(result).toBe("tcaer")
+})
+
+test("palindrome of releveler", () => {
+  const result = palindrome("releveleler")
+
+  expect(result).toBe("releveler")
+})
+```
+
+The ESLint configuration we added to the project in the previous complains about the **`test`** and **`expect`** commands in our test file, since the configuration does not allow **_globals_**. Let's get rid of the complaints by adding **`"jest": true`** to the **_env_** property in the **_.eslintrc.js_** file.
+
+```js
+module.exports = {
+  "env": {
+    "commonjs": true,
+    "es6": true,
+    "node": true,
+    "jest": true,
+  },
+  "extends": "eslint:recommended",
+  "rules": {
+    // ...
+  },
+}
+```
+
+In the first row, the test file imports the function to be tested and assigns it to a variable called **`palindrome`**:
+
+```js
+const palindrome = require("../utils/for_testing").palindrome
+```
+
+Individual test cases are defined with the **`test`** function. The first parameter of the function is the test description as a string. The second parameter is a **_function_**, that defines the functionality for the test case. The functionality for the second test case looks like this:
+
+```js
+() => {
+  const result = palindrome("react")
+
+  expect(result).toBe("tcaer")
+}
+```
+
+First we execute the code to be tested, meaning that we generate a plaindrome for the string **_react_**. Next we verify the results with the [expect](https://facebook.github.io/jest/docs/en/expect.html#content) function. Expect wraps the resulting value into an object that offers a collection of a **_matcher_** functions, that can be used for verifying the correctness of the result. Since in this test case we are comparing two strings, we can use the [toBe](https://facebook.github.io/jest/docs/en/expect.html#tobevalue) matcher.
+
+As expected, all of the tests pass:
+
+![jest test](../readme-imgs/jest-test.png)
+
+Jest expects by default that the names of test files contain **_.test_**. In this course, we will follow the convention of naming our tests files with the extension **_.test.js_**.
+
+Jest has excellent error messages, let's break the test to demonstrate this:
+
+```js
+test("palindrome of react", () => {
+  const result = palindrome("react")
+
+  expect(result).toBe("tkaer")
+})
+```
+
+Running the tests above results in the following error message:
+
+![jest test fail](../readme-imgs/jest-test-fail.png)
+
+Let's add a few tests for the **`average`** function, into a new file **_tests/average.test.js_**.
+
+```js
+const average = require("../utils/for_testing").average
+
+describe("average", () => {
+  test("of one value is the value itself", () => {
+    expect(average([1])).toBe(1)
+  })
+
+  test("of many is calculated right", () => {
+    expect(average([1, 2, 3, 4, 5, 6])).toBe(3.5)
+  })
+
+  test("of empty array is zero", () => {
+    expect(average([])).toBe(0)
+  })
+})
+```
+
+The test reveals that the function does not work correctly with an empty array (this is because in JavaScript dividing by zero results in **_NaN_**):
+
+![jest test fail](../readme-imgs/jest-test-fail2.png)
+
+Fixing the function is quite easy:
+
+```js
+const average = array => {
+  const reducer = (sum, item) => {
+    return sum + item
+  }
+
+  return array.length === 0 ? 0 : array.reduce(reducer, 0) / array.length
+}
+```
+
+If the length of the array is **`0`** then we return **`0`**, and in all other cases we use the **`reduce`** method to calculate the average.
+
+There are a few things to notice about the tests that we just wrote. We defined a **_describe_** block around the tests that was given the name **`average`**:
+
+```js
+describe("average", () => {
+  // tests
+})
+```
+
+Describe blocks can be used for grouping tests into logical collections. The test output of Jest also uses the name of the describe block:
+
+![describe block](../readme-imgs/describe-block.png)
+
+As we'll see later on **_describe_** blocks are necessary when we want to run some shared setup or teardown operations for a group tests.
+
+Another thing to notice is that we wrote the tests in quite a compact way, without assigning the output of the function being tested to a variable:
+
+```js
+test("of empty array is zero", () => {
+  expect(averate([])).toBe(0)
+})
+```
