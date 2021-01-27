@@ -537,3 +537,23 @@ test("of empty array is zero", () => {
   expect(averate([])).toBe(0)
 })
 ```
+
+You can run a single test with the only method:
+
+```js
+test.only('it is raining', () => {
+  expect(inchesOfRain()).toBeGreaterThan(0);
+});
+
+test('it is not snowing', () => {
+  expect(inchesOfSnow()).toBe(0);
+});
+```
+
+Only the **`"it is raining"`** test will run
+
+Another way of running a single test (or describe block) is to specify the name of the test to be run with the **`-t`** flag:
+
+```bash
+npm test -- -t "when list has only one blog, equals the likes of that"
+```
