@@ -3,6 +3,9 @@
 - [Structure of Backend Application, Introduction to Testing](#structure-of-backend-application-introduction-to-testing)
   - [Project Structure](#project-structure)
   - [Testing Node Applications](#testing-node-applications)
+  - [Testing the Backend](#testing-the-backend)
+    - [Test Environment](#test-environment)
+    - [**`supertest`**](#supertest)
 
 ## Project Structure
 
@@ -556,4 +559,229 @@ Another way of running a single test (or describe block) is to specify the name 
 
 ```bash
 npm test -- -t "when list has only one blog, equals the likes of that"
+```
+
+## Testing the Backend
+
+Since the backend does not contain any complicated logic, ot doesn't make sense to write [unit tests](https://en.wikipedia.org/wiki/Unit_testing) for it. The only potential thing we could unit test is the **`toJSON`** method that is used for formatting notes.
+
+In some situations, it can be beneficial to implement some of the backend tests by mocking the database instead of using a real database. One library that could be used for this is [mongo-mock](https://github.com/williamkapke/mongo-mock).
+
+Since our app's backend is still relatively simple, we will make the decision to test the entire application through its REST API, so that the database is also included. **This kind of testing where multiple components of the system are being tested as a group, is called** [integration testing](https://en.wikipedia.org/wiki/Integration_testing).
+
+### Test Environment
+
+When your backend server is running in Heroku, it is in **_production_** mode.
+
+The convention in Node is to define the execution mode of the application with the **_NODE_ENV_** environment variable. In our current app, we only load the environment variables defined in the **_.env_** file if the app is **_not_** in production mode.
+
+It is common practice to define separate modes for development and testing.
+
+Next, let's change the scripts in our **_package.json_** so that when tests are run, **_NODE\_ENV_** gets the value **_test_**:
+
+```js
+{
+  // ...
+  "scripts": {
+    "start": "NODE_ENV=production node index.js",
+    "dev": "NODE_ENV=development nodemon index.js",
+    "lint": "eslint .",
+    "build:ui": "rm -rf build && cd ../notes && npm run build && cp -r build ../backend/",
+    "deploy": "git push heroku master",
+    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && npm run deploy",
+    "logs:prod": "heroku logs --tail",
+    "test": "NODE_ENV=test jest --verbose --runInBand"
+  },
+  // ...
+}
+```
+
+We also added the [runInBand](https://jestjs.io/docs/en/cli.html#--runinband) option to the npm script that executes the tests. This option will prevent Jest from running tests in parallel.
+
+We specified he mode of the app to be **_development_** in the **`npm run dev`** script that uses **nodemon**. We also specified that the default **`npm start`** command will defined the mode as production.
+
+This script will not work on Windows. We can correct this by installing the [cross-env](https://www.npmjs.com/package/cross-env) package as a development dependency with the command:
+
+```js
+npm install --save-dev cross-env
+```
+
+We can then achieve cross-platform compatibility by using the cross-env library in our npm scripts defined in `package.json`.
+
+```js
+{
+  // ...
+  "scripts": {
+    "start": "cross-env NODE_ENV=production node index.js",
+    "dev": "cross-env NODE_ENV=development nodemon index.js",
+    // ...
+    "test": "cross-env NODE_ENV=test jest --verbose --runInBand"
+  },
+  // ...
+}
+```
+
+Now we can modify the way that our application runs in different modes. As an example of this, we could defined the application to use a separate test database when it is running tests.
+
+We can create our separate test database in MongoDB Atlas. This is not an optimal solution in situations where there are many people developing the same application. Test execution in particular typically requires that a single database instance is not used by tests that are running concurrently.
+
+It would be better to run our tests using a database that is installed and running in the developer's local machine. The optimal solution would be to have every test execution use its own separate database. This is relatively simple to achieve by [running Mongo in-memory](https://docs.mongodb.com/manual/core/inmemory/) or by using [Docker](https://www.docker.com/) containers. We will not complicate things and will instead continue to use the MongoDB Atlas database.
+
+Let's make some changes to the module that defines the app's configuration:
+
+```js
+require("dotenv").config()
+
+const PORT = process.env.PORT
+let MONGODB_URI = process.env.MONGODB_URI
+
+if (process.env.NODE_ENV === "test") {
+  MONDODB_URI = process.env.TEST_MONGODB_URI
+}
+
+module.exports = {
+  MONGODB_URI,
+  PORT,
+}
+```
+
+The **_.env_** file has **_separate variables_** for the database addresses of the development and test databases:
+
+```js
+MONGODB_URI=mongodb+srv://fullstack:secred@cluster0-ostce.mongodb.net/note-app?retryWrites=true
+PORT=3001
+
+TEST_MONGODB_URI=mongodb+srv://fullstack:secret@cluster0-ostce.mongodb.net/note-app-test?retryWrites=true
+```
+
+The **`config`** module that we have implemented slightly resembles the [node-config](https://github.com/lorenwest/node-config) package. Writing our own implementation is justified since our app is simple.
+
+These are the only changes we need to make to our app's code.
+
+### **`supertest`**
+
+Let's use the supertest package to help us write our tests for testing the API.
+
+```
+npm install --save-dev supertest
+```
+
+Let's write our first test in the **_tests/note_api.test.js_** file:
+
+```js
+const mongoose = require("mongoose")
+const supertest = require("supertest")
+const app = require("../app")
+
+const api = supertest(app)
+
+test("notes are returned as json", async () => {
+  await api
+    .get("/api/notes")
+    .expect(200)
+    .expect("Content-Type", /application\/json/)
+})
+
+afterAll(() => {
+  mongoose.connection.close()
+})
+```
+
+The test imports the Express application from the **_app.js_** module and wraps it with the **_supertest_** function into a so-called [superagent](https://github.com/visionmedia/superagent) object. This object is assigned to the **_api_** variable and tests can use it for making HTTP requests to the backend.
+
+Our test makes an HTTP GET request to the **_api/notes_** url and verifies that the request is responded to with the status code 200.
+
+Once all the tests have finished running we have to close the database connection used by Mongoose. This can b acheived with the [afterAll](https://facebook.github.io/jest/docs/en/api.html#afterallfn-timeout) method:
+
+```js
+afterAll(() => {
+  mongoose.connection.close()
+})
+```
+
+When running your tests you may run across the following console warning:
+
+![Jest async error](../readme-imgs/async-error.png)
+
+If this occurs, let's follow the instructions and add a **_jest.config.js_** file at the root of the project with the following content:
+
+```js
+module.exports {
+  testEnvironment: "node"
+}
+```
+
+One tiny but important detail: at the beginning of this part we extracted the Express application into the **_app.js_** file, and the role of the **_index.js_** file was changed to launch the application at the specified port with Node's built-in **_http_** object:
+
+```js
+const app = require("./app") // the actual Express app
+const http = require("http")
+const config = require("./utils/config")
+const logger = require("./utils/logger")
+
+const server = http.createServer(app)
+
+server.listen(config.PORT, () => {
+  logger.info(`Server running on port ${config.PORT}`)
+})
+```
+
+The tests only use the express application defined in the **_app.js_** file:
+
+```js
+const mongoose = require("mongoose")
+const supertest = require("supertest")
+const app = require("../app")
+
+const api = supertest(app)
+
+// ...
+```
+
+The documentation for supertest says the following:
+
+> if the server is not already listening for connections then it is bound to an ephemeral port for you so there is no need to keep track of ports.
+
+In other words, supertest takes care that the application being tested is started at the port that it uses internally.
+
+Let's write a few more tests:
+
+```js
+test("there are two notes", async () => {
+  const response = await api.get("/api/notes")
+
+  expect(response.body).toHaveLength(2)
+})
+
+test("the first note is about HTTP methods", async () => {
+  const response = await api.get("/api/notes")
+
+  expect(response.body[0].content).toBe("HTML is easy")
+})
+```
+
+Both tests store the resonse of the request to the **`response`** variable, and unlike the previous test that used the methods provided by **`supertest`** for verifying the status code and headers, this time we are inspecting the response data stored in **_response.body_** property. Our tests verify the format and content of the response data with the [expect](https://facebook.github.io/jest/docs/en/expect.html#content) method of Jest.
+
+The benefit of using the async/await syntax is starting to become evident. Normally we would have to use callback functions to access the data returned by promises, but with the new syntax things are a lot more comfortable:
+
+```js
+const response = await api.get("api/notes")
+```
+
+The middleware that outputs information about the HTTP requests is obstructing the test execution output. Let us modify the logger so that it does not print to console in test mode:
+
+```js
+const info = (...params) => {
+  if (process.env.NODE_ENV !== "test") {
+    console.log(...params)
+  }
+}
+
+const error = (...params) => {
+  console.log(...params)
+}
+
+module.exports = {
+  info, error
+}
 ```
